@@ -4,7 +4,7 @@ import { watchBlockNumber } from "@wagmi/core";
 import { useEffect, useMemo, useState } from "react";
 import { ethers, Signer } from "ethers";
 import { constants } from "../constants";
-import { useAccount, useSigner } from "wagmi";
+import { useAccount, useProvider, useSigner } from "wagmi";
 import Link from "next/link";
 import { render_circles } from "../utils";
 import SVG from "react-inlinesvg";
@@ -13,6 +13,8 @@ export default function Home() {
   const { address, isConnected } = useAccount();
   const [blockData, setBlockData] = useState<any>();
   const [caughtBlock, catchBlock] = useState<any>();
+  const provider = useProvider();
+
   const { data: signer } = useSigner();
   const [svg, setSVG] = useState<string>();
   const contract = new ethers.Contract(
@@ -31,12 +33,8 @@ export default function Home() {
 
   const getBlockData = async (blockNumber: number) => {
     try {
-      const { ethereum } = window;
-      if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum as any);
-        const data = await provider.getBlock(blockNumber);
-        setBlockData(data);
-      }
+      const data = await provider.getBlock(blockNumber);
+      setBlockData(data);
     } catch (error) {
       console.log(error);
     }
