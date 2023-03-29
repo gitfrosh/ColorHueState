@@ -1,27 +1,18 @@
-/**
-
-ColorHueState, 2023
-Jurgen Ostarhild
-https://www.colorhuestate.xyz
-
-"Lorem ipsum." - 2006
-
-*/
-
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.12;
-
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import {Base64} from "base64-sol/base64.sol";
-import "hardhat/console.sol";
+import { SvgGenerator } from "./SvgGenerator.sol";
 
-/// @author Rike Exner
 contract ColorHueState is Ownable, ERC721Enumerable {
+    uint256 private _tokenIdCounter;
+    mapping(uint256 => string) private _tokenURIs;
+
     using Strings for uint256;
 
     // Mint price
@@ -48,19 +39,14 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     // Internal tokenId tracker
     uint256 private _currentId;
 
-    // Dev address. Set to owner's address to revoke.
     address private devAddress;
 
-    // placeholder svg - for dev purposes.
     string private placeholderSvg =
         '<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="296" height="296" style="fill:#DEDEDE;stroke:#555555;stroke-width:2"/><text x="50%" y="50%" font-size="18" text-anchor="middle" alignment-baseline="middle" font-family="monospace, sans-serif" fill="#555555">300&#215;300</text></svg>';
 
     event ColorHueStateCreated(uint256 indexed tokenId);
     event TokenUpdated(uint256 tokenId);
 
-    /**
-     * @notice Throws if called by an account other than the owner or dev.
-     */
     modifier onlyOwnerOrDev() {
         require(
             owner() == msg.sender || devAddress == msg.sender,
@@ -74,9 +60,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         devAddress = 0x0EEb237e58824fa2c0836d4793aa835f99373bB7;
     }
 
-    /**
-     * @notice Update SVG and token metadata for a given tokenId.
-     */
     function updateToken(
         uint256 tokenId,
         string calldata _svgData
@@ -87,84 +70,96 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         emit TokenUpdated(tokenId);
     }
 
-    /**
-     * @notice Permanently freeze metadata updates. Caution, not reversable.
-     */
     function permanentlyFreezeMetadata() external onlyOwnerOrDev {
         metadataFrozen = true;
     }
 
-    /**
-     * @notice Withdraw contract balance to owner.
-     */
     function withdrawAll() external {
         uint256 amount = address(this).balance;
         require(payable(owner()).send(amount));
     }
 
-    /**
-     * @notice Update the baseUrl in case of website change.
-     * @dev Forms the first part of the `external_url` field in tokenURI.
-     */
     function updateBaseUrl(string calldata _baseUrl) external onlyOwnerOrDev {
         baseUrl = _baseUrl;
     }
 
-    /**
-     * @notice Disable/enable minting (but won't exceed)
-     * @dev Only callable by owner.
-     */
     function toggleSale() external onlyOwnerOrDev {
         saleActive = !saleActive;
     }
 
-    /**
-     * @notice Mint ColorHueStates to sender.
-     */
-    function mint() external payable {
+    function mint(uint256 blockNumber) external payable {
+        _tokenIdCounter += 1;
+        uint256 newItemId = _tokenIdCounter;
+
         require(saleActive, "Sale not active.");
         require(msg.value >= price, "Not enough Ether sent.");
 
-        _mint(msg.sender, _currentId);
-        emit ColorHueStateCreated(_currentId++);
+        _mint(msg.sender, newItemId);
+        _tokenURIs[newItemId] = _constructTokenURI(newItemId, blockNumber);
+
+        emit ColorHueStateCreated(newItemId++);
     }
 
-    /**
-     * @notice Transfer tokenId to burn address.
-     */
-    function burn(uint256 tokenId) external onlyOwnerOrDev {
-        _burn(tokenId);
-    }
-
-    /**
-     * @notice Compose on-chain tokenURI for ColorHueState.
-     */
-    function tokenURI(
-        uint256 tokenId
-    ) public view override returns (string memory) {
+    function _constructTokenURI(
+        uint256 tokenId,
+        uint256 blockNumber
+    ) internal returns (string memory) {
         require(_exists(tokenId), "Nonexistent token.");
-        string memory style = "heystyle";
-        string memory lightness = "heylightness";
-        // Compose SVG paths and assemble final SVG
-        // (
-        //     string memory polyWhitePath,
-        //     string memory polyBlackPath,
-        //     string memory style,
-        //     string memory lightness
-        // ) = composePaths(bytes(svgData[tokenId]));
-        // string memory svg = Base64.encode(abi.encodePacked(
-        //     svgPart1,
-        //     polyWhitePath,
-        //     svgPart2,
-        //     polyBlackPath,
-        //     svgPart3
-        // ));
 
-        string memory svg = Base64.encode(abi.encodePacked(placeholderSvg));
-        // Compose and return base 64 encoded JSON string
+        bytes32 blockHash = getBlockHash(blockNumber);
+        string[8] memory ethereumColors = generateEthereumColors(blockHash);
+
+        string memory svg = SvgGenerator.generateSVG(ethereumColors);
+
+        return generateTokenURI(tokenId, svg, blockNumber);
+    }
+
+    function generateEthereumColors(
+        bytes32 blockHash
+    ) internal returns (string[8] memory) {
+        string[8] memory ethereumColors;
+        string memory blockHashString = bytes32ToLiteralString(blockHash);
+        for (uint256 i = 0; i < ethereumColors.length; i++) {
+            string memory color = substring(blockHashString, i * 6, i * 6 + 6);
+            ethereumColors[i] = string(abi.encodePacked("#", color));
+        }
+        return ethereumColors;
+    }
+
+    function bytes32ToLiteralString(
+        bytes32 data
+    ) public pure returns (string memory result) {
+        bytes memory temp = new bytes(65);
+        uint256 count;
+
+        for (uint256 i = 0; i < 32; i++) {
+            bytes1 currentByte = bytes1(data << (i * 8));
+
+            uint8 c1 = uint8(bytes1((currentByte << 4) >> 4));
+
+            uint8 c2 = uint8(bytes1((currentByte >> 4)));
+
+            if (c2 >= 0 && c2 <= 9) temp[++count] = bytes1(c2 + 48);
+            else temp[++count] = bytes1(c2 + 87);
+
+            if (c1 >= 0 && c1 <= 9) temp[++count] = bytes1(c1 + 48);
+            else temp[++count] = bytes1(c1 + 87);
+        }
+
+        result = string(temp);
+    }
+
+
+    function generateTokenURI(
+        uint256 tokenId,
+        string memory svg,
+        uint256 blockNumber
+    ) internal returns (string memory) {
+        string memory style = Strings.toString(blockNumber);
+        string memory lightness = "heylightness";
         string memory json = packJSONString(
             tokenId,
-            svg,
+            Base64.encode(abi.encodePacked(svg)),
             style,
             lightness,
             baseUrl
@@ -174,169 +169,17 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         return string(abi.encodePacked("data:application/json;base64,", json));
     }
 
-    function randomNumberBetween1and16() public view returns (uint) {
-        return
-            uint(
-                keccak256(
-                    abi.encodePacked(
-                        block.timestamp,
-                        block.difficulty,
-                        msg.sender
-                    )
-                )
-            ) % 16;
+    function burn(uint256 tokenId) external onlyOwnerOrDev {
+        _burn(tokenId);
     }
 
-    function getRandomColor() internal view returns (string memory) {
-        string[16] memory letters = [
-            "0",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F"
-        ];
-
-        // html color code starts with #
-        string memory color = "#";
-
-        // generating 6 times as HTML color code consist
-        // of 6 letter or digits
-        for (uint i = 0; i < 6; i++) {
-            uint index = randomNumberBetween1and16();
-            string memory code = letters[index];
-            color = string(abi.encodePacked(color, code));
-        }
-        console.log(color);
+    function tokenURI(
+        uint256 tokenId
+    ) public view override(ERC721) returns (string memory) {
+        require(_exists(tokenId), "ERC721: URI query for nonexistent token");
+        return _tokenURIs[tokenId];
     }
 
-    /**
-     * @notice Compose both SVG path values from data string.
-     */
-    function composePaths(
-        bytes memory svgBytes
-    )
-        internal
-        pure
-        returns (string memory, string memory, string memory, string memory)
-    {
-        string memory polyWhitePath = "M0 0";
-        string memory polyBlackPath = "M0 0";
-        string memory firstChars;
-        uint256 offset;
-        uint256 length;
-
-        // Iterate over 4 byte chunks and compose path strings
-        for (uint256 i = 4; i < svgBytes.length; i += 4) {
-            // Convert first 3 bytes to uint256 to get `length` and `offset`
-            firstChars = string(
-                abi.encodePacked(svgBytes[i], svgBytes[i + 1], svgBytes[i + 2])
-            );
-            offset = strToUint(firstChars);
-            length = 800 - (2 * offset);
-
-            // Compose path strings
-            if (svgBytes[i + 3] == "n") {
-                polyBlackPath = string(
-                    abi.encodePacked(
-                        polyBlackPath,
-                        " M",
-                        uintToStr(offset),
-                        " ",
-                        uintToStr(offset + length),
-                        " V",
-                        uintToStr(offset),
-                        " H",
-                        uintToStr(offset + length)
-                    )
-                );
-                polyWhitePath = string(
-                    abi.encodePacked(
-                        polyWhitePath,
-                        " M",
-                        uintToStr(offset),
-                        " ",
-                        uintToStr(offset + length),
-                        " H",
-                        uintToStr(offset + length),
-                        " V",
-                        uintToStr(offset)
-                    )
-                );
-            }
-
-            if (svgBytes[i + 3] == "p") {
-                polyBlackPath = string(
-                    abi.encodePacked(
-                        polyBlackPath,
-                        " M",
-                        uintToStr(offset),
-                        " ",
-                        uintToStr(offset + length),
-                        " H",
-                        uintToStr(offset + length),
-                        " V",
-                        uintToStr(offset)
-                    )
-                );
-                polyWhitePath = string(
-                    abi.encodePacked(
-                        polyWhitePath,
-                        " M",
-                        uintToStr(offset),
-                        " ",
-                        uintToStr(offset + length),
-                        " V",
-                        uintToStr(offset),
-                        " H",
-                        uintToStr(offset + length)
-                    )
-                );
-            }
-        }
-
-        // Calculate attributes
-        // Frame width is first 4 bytes of string
-        uint256 totalLeftMargins = strToUint(
-            string(
-                abi.encodePacked(
-                    svgBytes[0],
-                    svgBytes[1],
-                    svgBytes[2],
-                    svgBytes[3]
-                )
-            )
-        );
-        string memory style;
-        // Total bevels is the length of our SVG bytes, minus the first four (which
-        // are for totalLeftMargins), divided by our 4 byte chunks
-        string memory lightness = (totalLeftMargins /
-            ((svgBytes.length - 4) / 4)).toString();
-
-        if (totalLeftMargins < 120) {
-            style = "sharp";
-        } else if (120 <= totalLeftMargins && totalLeftMargins < 300) {
-            style = "robust";
-        } else if (totalLeftMargins >= 300) {
-            style = "monumental";
-        }
-
-        return (polyWhitePath, polyBlackPath, style, lightness);
-    }
-
-    /**
-     * @notice Compose the final base 64 encoded JSON to return from `tokenURI`.
-     */
     function packJSONString(
         uint256 tokenId,
         string memory encodedSVG,
@@ -344,21 +187,15 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         string memory lightness,
         string memory _baseUrl
     ) public view returns (string memory) {
-        string memory color = getRandomColor();
+        string memory color = "#000000";
         string memory name = string(
-            abi.encodePacked(
-                "ColorHueState Color ",
-                color,
-                "No. ",
-                tokenId.toString()
-            )
+            abi.encodePacked("ColorHueState Block #", tokenId.toString())
         );
         string memory description = string(
             abi.encodePacked(
-                "ColorHueState lorem ipsum.",
-                " BlockNo. ",
+                "ColorHueState Block #",
                 block.number.toString(),
-                " ColorHueState is an on-chain deterministically generated SVG. No. ",
+                ". ColorHueState ...",
                 tokenId.toString()
             )
         );
@@ -390,55 +227,51 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             );
     }
 
-    /**
-     * @notice Utility to convert string to uint256.
-     */
-    function strToUint(string memory _str) internal pure returns (uint256 res) {
-        for (uint256 i = 0; i < bytes(_str).length; i++) {
-            if (
-                (uint8(bytes(_str)[i]) - 48) < 0 ||
-                (uint8(bytes(_str)[i]) - 48) > 9
-            ) {
-                return 0;
-            }
-            res +=
-                (uint8(bytes(_str)[i]) - 48) *
-                10 ** (bytes(_str).length - i - 1);
-        }
-        return res;
-    }
-
-    /**
-     * @notice Utility to convert uint256 to string.
-     */
-    function uintToStr(
-        uint _i
-    ) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint j = _i;
-        uint len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint k = len;
-        while (_i != 0) {
-            k = k - 1;
-            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
-    }
-
-    /**
-     * @notice Update dev address. To revoke, set to owner's address.
-     */
     function updateDevAddress(address _address) external onlyOwnerOrDev {
         devAddress = _address;
+    }
+
+    function substring(
+        string memory str,
+        uint startIndex,
+        uint endIndex
+    ) public view returns (string memory) {
+        bytes memory strBytes = bytes(str);
+        bytes memory result = new bytes(endIndex - startIndex);
+        for (uint i = startIndex; i < endIndex; i++) {
+            result[i - startIndex] = strBytes[i];
+        }
+        return string(result);
+    }
+
+    function uintToString(uint256 value) private pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+
+    function getBlockHash(uint256 blockNumber) public view returns (bytes32) {
+        if (blockNumber == block.number) {
+            return blockhash(block.number - 1);
+        } else if (
+            blockNumber < block.number && blockNumber >= block.number - 256
+        ) {
+            return bytes32(blockhash(blockNumber));
+        } else {
+            return bytes32(0);
+        }
     }
 }

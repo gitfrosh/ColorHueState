@@ -45,9 +45,12 @@ export default function Home() {
   console.log(caughtBlockSvg);
 
   const mint = async () => {
-    const tx = await contract.connect(signer as Signer).mint({
-      value: ethers.utils.parseEther("0.001"),
-    });
+    const tx = await contract
+      .connect(signer as Signer)
+      .mint(caughtBlock?.number, {
+        value: ethers.utils.parseEther("0.001"),
+        gasLimit: 10000000,
+      });
     const result = await tx.wait();
     console.log(result);
   };

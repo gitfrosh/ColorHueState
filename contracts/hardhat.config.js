@@ -3,7 +3,15 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 module.exports = {
-  solidity: '0.8.12',
+  solidity: {
+    version: "0.8.12",
+    settings: {
+      optimizer: {
+        enabled: false,
+        runs: 1000,
+      },
+    },
+  },
   networks: {
     goerli: {
       url: process.env.ALCHEMY_API_URL,

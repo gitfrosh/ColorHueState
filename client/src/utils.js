@@ -44,38 +44,29 @@ export function render_circles(last_hash) {
     if (!last_hash) return;
     var etherium_colors = new Array(8);
     for (var i = 0; i < etherium_colors.length; i++) {
+
         etherium_colors[i] = "#" + last_hash.substring(i * 6, i * 6 + 6);
+        console.log(etherium_colors[i])
     }
-    // get_etherium_colors();
-    // var canvas = document.getElementById("myCanvas");
+
     var w = window.innerWidth;
     var h = window.innerHeight;
 
-    // canvas.style.width = w;
-    // canvas.style.height = h;
+    // var diameters = [0.0, 0.25, 0.5, 0.75, 0.98];
 
-    var diameters = [0.0, 0.25, 0.5, 0.75, 0.98];
-    console.log({ diameters });
-
-    console.log({ w, h });
     var html = '<svg height="' + h + '" width="' + w + '">\n';
-    for (var i = 0; i < diameters.length - 1; i++) {
-        var start = etherium_colors[i * 2];
-        var end = etherium_colors[i * 2 + 1];
-        //var gradientColours = coloursBetween(start, end, diameters[i+1]*m-diameters[i]*m);
-        //console.log(start);
-    }
+    // for (var i = 0; i < diameters.length - 1; i++) {
+    //     var start = etherium_colors[i * 2];
+    //     var end = etherium_colors[i * 2 + 1];
+    //     console.log(start, end)
 
-    // var m = Math.floor(Math.min(w, h) / 2);
-    //for (var i = 0; i < diameters.length - 1; i++) {
-
-    var D = Math.floor(Math.min(w, h));
-    D = 500;
+    // }
+    // var D = Math.floor(Math.min(w, h));
+    var D = 500;
     var rs = [200, 155, 110, 61];
     var ps = [75, 75, 75, 0];
 
-    //for (var i = diameters.length - 2; i>=0; i--) {
-    for (var i = 0; i < diameters.length - 1; i++) {
+    for (var i = 0; i < 5 - 1; i++) {
         var start = etherium_colors[i * 2];
         var end = etherium_colors[i * 2 + 1];
         html += "<defs>\n";
@@ -107,10 +98,9 @@ export function render_circles(last_hash) {
             '" fill="url(#grad' +
             i +
             ')" />\n';
-        //html += '</svg>';
     }
     html += "</svg>\n";
-    console.log(html);
+    // console.log(html);
 
     return html;
     // canvas.innerHTML = html;
