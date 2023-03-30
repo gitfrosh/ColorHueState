@@ -65,7 +65,8 @@ export function render_circles(last_hash) {
     var D = 500;
     var rs = [200, 155, 110, 61];
     var ps = [75, 75, 75, 0];
-
+    console.log({ D })
+    console.log({ w, h })
     for (var i = 0; i < 5 - 1; i++) {
         var start = etherium_colors[i * 2];
         var end = etherium_colors[i * 2 + 1];

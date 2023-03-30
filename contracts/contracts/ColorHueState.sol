@@ -7,9 +7,13 @@ import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import {Base64} from "base64-sol/base64.sol";
-import { SvgGenerator } from "./SvgGenerator.sol";
+import "./SvgGenerator.sol";
+import "hardhat/console.sol";
+
 
 contract ColorHueState is Ownable, ERC721Enumerable {
+    SvgGenerator svgGenerator = new SvgGenerator();
+
     uint256 private _tokenIdCounter;
     mapping(uint256 => string) private _tokenURIs;
 
@@ -108,9 +112,11 @@ contract ColorHueState is Ownable, ERC721Enumerable {
 
         bytes32 blockHash = getBlockHash(blockNumber);
         string[8] memory ethereumColors = generateEthereumColors(blockHash);
-
-        string memory svg = SvgGenerator.generateSVG(ethereumColors);
-
+        console.log(ethereumColors[0]);
+        console.log(ethereumColors[7]);
+    
+        string memory svg = svgGenerator.generateSVG(ethereumColors);
+        console.log(svg);
         return generateTokenURI(tokenId, svg, blockNumber);
     }
 

@@ -23,7 +23,7 @@ export default function Home() {
     () => render_circles(caughtBlock?.hash),
     [blockData?.hash]
   );
-
+  console.log(svg);
   useEffect(() => {
     const svg = render_circles(blockData?.hash);
     setSVG(svg);

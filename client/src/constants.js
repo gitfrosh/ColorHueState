@@ -1,5 +1,5 @@
 export const constants = {
-    NFT_ADDRESS: "0x743F990BdbFc69571c17826255A9BA6C807534Fd",
+    NFT_ADDRESS: "0x9AbED5bc3356D5B3A31B7897c80887E5D23c7ccE",
     NFT_ABI: [
         {
             "inputs": [],
