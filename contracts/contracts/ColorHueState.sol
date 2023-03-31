@@ -155,7 +155,8 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
     function _constructTokenURI(
         uint256 tokenId,
         uint256 blockNumber
-    ) internal returns (string memory) {
+    ) internal       view
+returns (string memory) {
         require(_exists(tokenId), "Nonexistent token.");
         bytes32 blockHash = getBlockHash(blockNumber);
         string[8] memory colors = ethereumColors.generateEthereumColors(
@@ -181,6 +182,7 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
             blockNumber,
             baseUrl
         );
+        console.log(json);
         string memory finalUri = string(
             abi.encodePacked("data:application/json;base64,", json)
         );
@@ -226,7 +228,7 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
                             description,
                             '", "image":"data:image/svg+xml;base64,',
                             encodedSVG,
-                            '"}]',
+                            '"',
                             bytes(_baseUrl).length > 0
                                 ? string(
                                     abi.encodePacked(
