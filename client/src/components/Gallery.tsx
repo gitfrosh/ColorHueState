@@ -23,7 +23,7 @@ export function Gallery() {
       }
     );
     console.log(nfts);
-    setNfts(nfts.slice(0, 3));
+    setNfts(nfts.slice(0, 4));
   };
 
   return (
