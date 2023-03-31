@@ -18,8 +18,8 @@ describe("ColorHueState", function () {
       const contractDeployed = await Contract.deploy();
 
       contractDeployed.toggleSale();
-      await mine(8738977);
-      contractDeployed.mint(8738977, { value: 1000000000000000, gasLimit: 10000000 });
+      await mine(8746179);
+      contractDeployed.mint(8746179, { value: 1000000000000000, gasLimit: 10000000 });
 
     });
   });

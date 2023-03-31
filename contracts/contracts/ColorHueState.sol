@@ -6,7 +6,7 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import {Base64} from "base64-sol/base64.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
 import "./SvgGenerator.sol";
 import "hardhat/console.sol";
 
@@ -60,7 +60,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     }
 
     constructor() ERC721("ColorHueState", "CHS") {
-        baseUrl = "https://ornament.leegte.org/ornament.html?tokenid=";
+        baseUrl = "http://www.colorhuestate.xyz/?tokenid=";
         devAddress = 0x0EEb237e58824fa2c0836d4793aa835f99373bB7;
     }
 
@@ -111,9 +111,15 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         require(_exists(tokenId), "Nonexistent token.");
 
         bytes32 blockHash = getBlockHash(blockNumber);
+        console.logBytes32(blockHash);
         string[8] memory ethereumColors = generateEthereumColors(blockHash);
         console.log(ethereumColors[0]);
-        console.log(ethereumColors[7]);
+        console.log(ethereumColors[1]);
+        console.log(ethereumColors[2]);
+        console.log(ethereumColors[3]);
+        console.log(ethereumColors[4]);
+        console.log(ethereumColors[5]);
+        console.log(ethereumColors[6]);
     
         string memory svg = svgGenerator.generateSVG(ethereumColors);
         console.log(svg);
@@ -125,8 +131,19 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     ) internal returns (string[8] memory) {
         string[8] memory ethereumColors;
         string memory blockHashString = bytes32ToLiteralString(blockHash);
+        console.log(blockHashString);
         for (uint256 i = 0; i < ethereumColors.length; i++) {
-            string memory color = substring(blockHashString, i * 6, i * 6 + 6);
+            console.log(i * 6);
+            string memory color;
+            if (i == 0) {
+              color = getFirstSixCharacters(blockHashString);
+            } else if (i == 1) {
+               color = substring(blockHashString, 7, 13);      
+            } else  {
+              color = substring(blockHashString, i * 7 - 1, i * 7 + 5);
+            }
+            
+            console.log(color);
             ethereumColors[i] = string(abi.encodePacked("#", color));
         }
         return ethereumColors;
@@ -163,16 +180,22 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     ) internal returns (string memory) {
         string memory style = Strings.toString(blockNumber);
         string memory lightness = "heylightness";
+        bytes memory svgBytes = abi.encodePacked(svg);
+        string memory svgBase64 = Base64.encode(svgBytes);
+        console.log(svgBase64);
+
         string memory json = packJSONString(
             tokenId,
-            Base64.encode(abi.encodePacked(svg)),
+            svg,
             style,
             lightness,
             baseUrl
         );
-
         // Create final tokenUri and return
-        return string(abi.encodePacked("data:application/json;base64,", json));
+        string memory finalUri = string(abi.encodePacked("data:application/json;base64,", json));
+        console.log(finalUri);
+        return finalUri;
+    
     }
 
     function burn(uint256 tokenId) external onlyOwnerOrDev {
@@ -207,15 +230,16 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         );
 
         return
-            Base64.encode(
+            Base64.encode( bytes(
+            string(
                 abi.encodePacked(
                     '{"name":"',
                     name,
                     '", "description":"',
                     description,
-                    '", "image":"data:image/svg+xml;base64,',
+                    '", "image_data":"',
                     encodedSVG,
-                    '", "attributes":[{"trait_type":"Style","value":"',
+                    '","attributes":[{"trait_type":"Style","value":"',
                     style,
                     '"}]',
                     bytes(_baseUrl).length > 0
@@ -229,7 +253,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
                         )
                         : "",
                     " }"
-                )
+                )))
             );
     }
 
@@ -237,18 +261,27 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         devAddress = _address;
     }
 
-    function substring(
-        string memory str,
-        uint startIndex,
-        uint endIndex
-    ) public view returns (string memory) {
+    function getFirstSixCharacters(string memory str) public pure returns (string memory) {
         bytes memory strBytes = bytes(str);
-        bytes memory result = new bytes(endIndex - startIndex);
-        for (uint i = startIndex; i < endIndex; i++) {
-            result[i - startIndex] = strBytes[i];
+        uint length = strBytes.length < 7 ? strBytes.length :7;
+        
+        bytes memory result = new bytes(length);
+        for (uint i = 0; i < length; i++) {
+            result[i] = strBytes[i];
         }
         return string(result);
     }
+
+
+function substring(string memory str, uint startIndex, uint endIndex) public view returns (string memory) {
+    bytes memory strBytes = bytes(str);
+    bytes memory result = new bytes(endIndex-startIndex);
+
+    for(uint i = startIndex; i < endIndex; i++) {
+        result[i-startIndex] = strBytes[i];
+    }
+    return string(result);
+}
 
     function uintToString(uint256 value) private pure returns (string memory) {
         if (value == 0) {
