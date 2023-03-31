@@ -1,38 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.12;
-import "hardhat/console.sol";
+pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/utils/Base64.sol";
 
-/// @author Rike Exner
 contract EthereumColors {
     function generateEthereumColors(
         bytes32 blockHash
-    ) external       view
-returns (string[8] memory) {
+    ) external pure returns (string[8] memory) {
         string[8] memory ethereumColors;
         string memory blockHashString = bytes32ToLiteralString(blockHash);
         for (uint256 i = 0; i < ethereumColors.length; i++) {
-            string memory color;
-            // i * 6, i * 6 + 6
-            if (i == 0) {
-                color = substring(blockHashString, 1, 7);
-            } else if (i == 1) {
-                color = substring(blockHashString, 7, 13);
-            } else if (i == 2) {
-                color = substring(blockHashString, 13, 19);
-            } else if (i == 3) {
-                color = substring(blockHashString, 19, 25);
-            } else if (i == 4) {
-                color = substring(blockHashString, 25, 31);
-            } else if (i == 5) {
-                color = substring(blockHashString, 31, 37);
-            } else if (i == 6) {
-                color = substring(blockHashString, 37, 43);
-            } else if (i == 7) {
-                color = substring(blockHashString, 43, 49);
-            } else {}
-
+            uint256 start = i * 6 + 1;
+            uint256 end = start + 6;
+            string memory color = substring(blockHashString, start, end);
             ethereumColors[i] = string.concat("#", color);
         }
         return ethereumColors;
@@ -63,13 +43,12 @@ returns (string[8] memory) {
 
     function substring(
         string memory str,
-        uint startIndex,
-        uint endIndex
+        uint256 startIndex,
+        uint256 endIndex
     ) public pure returns (string memory) {
         bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex - startIndex);
-
-        for (uint i = startIndex; i < endIndex; i++) {
+        for (uint256 i = startIndex; i < endIndex; i++) {
             result[i - startIndex] = strBytes[i];
         }
         return string(result);

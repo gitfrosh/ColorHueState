@@ -20,11 +20,8 @@ pragma solidity ^0.8.12;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
-import "./SvgGenerator.sol";
-import "./EthereumColors.sol";
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol"; 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol"; 
@@ -32,24 +29,18 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Storage.sol";
 
 /// @author Rike Exner
 contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
-    SvgGenerator svgGenerator = new SvgGenerator();
-    EthereumColors ethereumColors = new EthereumColors();
-
     uint256 private _tokenIdCounter;
     mapping(uint256 => string) private _tokenURIs;
 
     using Strings for uint256;
 
     // Mint price
-    uint256 public price = 0.001 ether;
-
-    // ColorHueState data
-    string[256] public svgData;
+    uint96 public price = 0.001 ether;
 
     // Royalties
     uint256 private constant BASIS_POINTS = 300;
     address private _royaltyReceiver;
-    uint256 private _royaltyPercentage;
+    uint96 private _royaltyPercentage;
 
     // Base `external_url` in attributes
     string public baseUrl;
@@ -83,7 +74,7 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
 
     }
 
-     function contractURI() public pure returns (string memory) {
+     function contractURI() external pure returns (string memory) {
         string memory json = string(
             abi.encodePacked(
                 '{',
@@ -106,20 +97,10 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
         return (_royaltyReceiver, (value * _royaltyPercentage) / BASIS_POINTS);
     }
 
-    function setDefaultRoyalty(address receiver, uint256 percentage) external onlyOwner {
+    function setDefaultRoyalty(address receiver, uint96 percentage) external onlyOwner {
         require(percentage <= BASIS_POINTS, "Invalid percentage");
         _royaltyReceiver = receiver;
         _royaltyPercentage = percentage;
-    }
-
-    function updateToken(
-        uint256 tokenId,
-        string calldata _svgData
-    ) external onlyOwnerOrDev {
-        require(!metadataFrozen, "Metadata permanently frozen.");
-
-        svgData[tokenId] = _svgData;
-        emit TokenUpdated(tokenId);
     }
 
     function permanentlyFreezeMetadata() external onlyOwnerOrDev {
@@ -159,11 +140,11 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
 returns (string memory) {
         require(_exists(tokenId), "Nonexistent token.");
         bytes32 blockHash = getBlockHash(blockNumber);
-        string[8] memory colors = ethereumColors.generateEthereumColors(
+        string[8] memory colors = generateEthereumColors(
             blockHash
         );
 
-        string memory svg = svgGenerator.generateSVG(colors);
+        string memory svg = generateSVG(colors);
         return generateTokenURI(tokenId, svg, blockNumber);
     }
 
@@ -253,25 +234,114 @@ returns (string memory) {
     function updateDevAddress(address _address) external onlyOwnerOrDev {
         devAddress = _address;
     }
+    
+    function generateSVG(
+        string[8] memory colors
+    ) public pure returns (string memory) {
+        uint128 D = 500;
+        uint64 temp1;
+        uint64 temp2;
+        uint64 temp3;
+        uint256[4] memory rs = [
+            uint256(200),
+            uint256(155),
+            uint256(110),
+            uint256(61)
+        ];
+        uint256[4] memory ps = [
+            uint256(75),
+            uint256(75),
+            uint256(75),
+            uint256(0)
+        ];
 
-    function uintToString(uint256 value) private pure returns (string memory) {
-        if (value == 0) {
-            return "0";
+        string memory html = '<svg xmlns="http://www.w3.org/2000/svg" height="800" width="800">';
+
+        for (uint8 i = 0; i < 4; i++) {
+            string memory start = colors[i * 2];
+            string memory end = colors[i * 2 + 1];
+
+            temp1 = uint64((D * rs[i]) / 200);
+            temp2 = temp1 * 2;
+            temp3 = temp2 / 3;
+
+            html = string(
+                abi.encodePacked(
+                    html,
+                    "<defs><radialGradient id=\"grad",
+                    Strings.toString(i),
+                    "\" cx=\"50%\" cy=\"50%\" r=\"50%\" fx=\"50%\" fy=\"50%\"><stop offset=\"",
+                    Strings.toString(ps[i]),
+                    "%\" style=\"stop-color:",
+                    start,
+                    ";stop-opacity:1\"></stop><stop offset=\"100%\" style=\"stop-color:",
+                    end,
+                    ";stop-opacity:1\"></stop></radialGradient></defs><circle cx=\"400\" cy=\"400\" rx=\"",
+                    Strings.toString(temp3),
+                    "\" r=\"",
+                    Strings.toString(temp3),
+                    "\" fill=\"url(#grad",
+                    Strings.toString(i),
+                    ")\" />"
+                )
+            );
         }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
+
+        html = string(abi.encodePacked(html, "</svg>"));
+
+        return html;
     }
+
+        function generateEthereumColors(
+        bytes32 blockHash
+    ) public pure returns (string[8] memory) {
+        string[8] memory ethereumColors;
+        string memory blockHashString = bytes32ToLiteralString(blockHash);
+        for (uint256 i = 0; i < ethereumColors.length; i++) {
+            uint256 start = i * 6 + 1;
+            uint256 end = start + 6;
+            string memory color = substring(blockHashString, start, end);
+            ethereumColors[i] = string.concat("#", color);
+        }
+        return ethereumColors;
+    }
+
+    function bytes32ToLiteralString(
+        bytes32 data
+    ) public pure returns (string memory result) {
+        bytes memory temp = new bytes(65);
+        uint256 count;
+
+        for (uint256 i = 0; i < 32; i++) {
+            bytes1 currentByte = bytes1(data << (i * 8));
+
+            uint8 c1 = uint8(bytes1((currentByte << 4) >> 4));
+
+            uint8 c2 = uint8(bytes1((currentByte >> 4)));
+
+            if (c2 >= 0 && c2 <= 9) temp[++count] = bytes1(c2 + 48);
+            else temp[++count] = bytes1(c2 + 87);
+
+            if (c1 >= 0 && c1 <= 9) temp[++count] = bytes1(c1 + 48);
+            else temp[++count] = bytes1(c1 + 87);
+        }
+
+        result = string(temp);
+    }
+
+    function substring(
+        string memory str,
+        uint256 startIndex,
+        uint256 endIndex
+    ) public pure returns (string memory) {
+        bytes memory strBytes = bytes(str);
+        bytes memory result = new bytes(endIndex - startIndex);
+        for (uint256 i = startIndex; i < endIndex; i++) {
+            result[i - startIndex] = strBytes[i];
+        }
+        return string(result);
+    }
+
 
     function getBlockHash(uint256 blockNumber) public view returns (bytes32) {
         if (blockNumber == block.number) {
@@ -284,6 +354,8 @@ returns (string memory) {
             return bytes32(0);
         }
     }
+
+    
 
     function supportsInterface(bytes4 interfaceId)
         public
