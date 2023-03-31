@@ -206,6 +206,8 @@ returns (string memory) {
         uint256 blockNumber,
         string memory _baseUrl
     ) public pure returns (string memory) {
+                string memory style ="hey";
+
         string memory name = string(
             abi.encodePacked("ColorHueState Block #", blockNumber.toString())
         );
@@ -228,7 +230,9 @@ returns (string memory) {
                             description,
                             '", "image":"data:image/svg+xml;base64,',
                             encodedSVG,
-                            '"',
+                            '", "attributes":[{"trait_type":"Style","value":"',
+                            style,
+                            '"}]',
                             bytes(_baseUrl).length > 0
                                 ? string(
                                     abi.encodePacked(
