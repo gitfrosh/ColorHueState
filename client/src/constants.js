@@ -1,5 +1,5 @@
 export const constants = {
-    NFT_ADDRESS: "0x21Ce7c04461E84ff51B582928b9f0C90a80Fe564",
+    NFT_ADDRESS: "0x3E498B0A767Ce3fb8A85554BfC4dC104D71ea885",
     NFT_ABI: [
         {
             "inputs": [],
@@ -211,6 +211,25 @@ export const constants = {
         {
             "inputs": [
                 {
+                    "internalType": "uint256",
+                    "name": "blockNumber",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getBlockHash",
+            "outputs": [
+                {
+                    "internalType": "bytes32",
+                    "name": "",
+                    "type": "bytes32"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
                     "internalType": "address",
                     "name": "owner",
                     "type": "address"
@@ -246,7 +265,13 @@ export const constants = {
             "type": "function"
         },
         {
-            "inputs": [],
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "blockNumber",
+                    "type": "uint256"
+                }
+            ],
             "name": "mint",
             "outputs": [],
             "stateMutability": "payable",
@@ -292,6 +317,45 @@ export const constants = {
                     "internalType": "address",
                     "name": "",
                     "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "string",
+                    "name": "encodedSVG",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "style",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "lightness",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "_baseUrl",
+                    "type": "string"
+                }
+            ],
+            "name": "packJSONString",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
                 }
             ],
             "stateMutability": "view",
@@ -404,6 +468,35 @@ export const constants = {
             "name": "setApprovalForAll",
             "outputs": [],
             "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "bytes32",
+                    "name": "str",
+                    "type": "bytes32"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "startIndex",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "endIndex",
+                    "type": "uint256"
+                }
+            ],
+            "name": "substring",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "pure",
             "type": "function"
         },
         {
