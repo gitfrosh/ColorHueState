@@ -17,6 +17,7 @@ export default function Home() {
   const provider = useProvider();
   // const blockDataHash = useMemo(() => blockData?.hash?.slice(2), [blockData]);
   const { data: signer } = useSigner();
+  const [isMinted, setMinted] = useState(false);
   const [svg, setSVG] = useState<string>();
   const [isMinting, toggleMinting] = useState(false);
   const contract = new ethers.Contract(
@@ -54,6 +55,9 @@ export default function Home() {
           gasLimit: 10000000,
         });
       const result = await tx.wait();
+      if (result?.transactionHash) {
+        setMinted(result?.transactionHash);
+      }
       console.log(result);
       toggleMinting(false);
     } catch (error) {
@@ -109,7 +113,12 @@ export default function Home() {
         </section>
         {!!caughtBlock && (
           <div className="w-400 h-400 absolute bottom-40 right-16 bg-black text-white border border-white rounded p-4 flex items-center">
-            <button onClick={() => catchBlock(undefined)}>
+            <button
+              onClick={() => {
+                catchBlock(undefined);
+                setMinted(undefined);
+              }}
+            >
               <svg
                 className="mx-auto w-5 h-5 text-white cursor-pointer absolute top-2 right-2"
                 viewBox="0 0 24 24"
@@ -131,19 +140,29 @@ export default function Home() {
                 dangerouslySetInnerHTML={{ __html: caughtBlock.svg || "" }}
               /> */}
               <br />
-              <p>Ready to mint? (0.001 ETH + gas)</p>
+              {!isMinted &&<p>Ready to mint? (0.001 ETH + gas)</p>}
               <br />
-              <button
-                disabled={isMinting}
-                onClick={() => {
-                  mint();
-                }}
-                className={`${
-                  isMinting && "cursor-not-allowed"
-                } bg-transparent hover:bg-white text-white font-semibold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded`}
-              >
-                {isMinting ? "Loading.." : "Mint"}
-              </button>
+              {!isMinted && (
+                <button
+                  disabled={isMinting}
+                  onClick={() => {
+                    mint();
+                  }}
+                  className={`${
+                    isMinting && "cursor-not-allowed"
+                  } bg-transparent hover:bg-white text-white font-semibold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded`}
+                >
+                  {isMinting && !isMinted ? "Loading.." : "Mint"}
+                </button>
+              )}
+              {isMinted && !isMinting && (
+                <a
+                  target={"_blank"}
+                  href={`https://goerli.etherscan.io/tx/${isMinted}`}
+                >
+                  > View transaction
+                </a>
+              )}
             </div>
           </div>
         )}
@@ -212,7 +231,7 @@ export default function Home() {
         >
           <div>
             <h2 className="text-xl text-white font-bold mb-4">ColorHueState</h2>
-            <div className="text-white">
+            <div className="text-white pr-5">
               ColorHueState is a cutting-edge digital art project that
               seamlessly blends the worlds of blockchain technology and visual
               aesthetics. Drawing inspiration from the dynamic and ever-evolving
@@ -242,7 +261,7 @@ export default function Home() {
           </div>
           <div>
             {/* <h2 className="text-lg font-bold mb-4">Column 2</h2> */}
-            <div className="text-white">
+            <div className="text-white pl-5">
               As a testament to the beauty of decentralized networks,
               ColorHueState transcends the boundaries of conventional art,
               inviting viewers to ponder the intricate connections between
