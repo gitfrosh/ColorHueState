@@ -22,13 +22,12 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
-import "hardhat/console.sol";
-import "@openzeppelin/contracts/interfaces/IERC2981.sol"; 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol"; 
-import "@openzeppelin/contracts/utils/introspection/ERC165Storage.sol"; 
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Storage.sol";
 
 /// @author Rike Exner
-contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
+contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
     uint256 private _tokenIdCounter;
     mapping(uint256 => string) private _tokenURIs;
 
@@ -71,33 +70,40 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
         baseUrl = "http://www.colorhuestate.xyz/?tokenid=";
         devAddress = 0x4a7D0d9D2EE22BB6EfE1847CfF07Da4C5F2e3f22; // Rike
         _registerInterface(type(IERC2981).interfaceId); // Register ERC2981 interface
-
     }
 
-     function contractURI() external pure returns (string memory) {
+    function contractURI() external pure returns (string memory) {
         string memory json = string(
             abi.encodePacked(
-                '{',
+                "{",
                 '"name": "ColorHueState",',
                 '"description": "ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology.",',
                 '"seller_fee_basis_points": 300,',
                 '"fee_recipient": "0x4a7D0d9D2EE22BB6EfE1847CfF07Da4C5F2e3f22"', // Jurgen
-                '}'
+                "}"
             )
         );
-        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json))));
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(bytes(json))
+                )
+            );
     }
 
-     // Implementing ERC2981 royalties
-    function royaltyInfo(uint256, uint256 value)
-        external
-        view
-        returns (address, uint256)
-    {
+    // Implementing ERC2981 royalties
+    function royaltyInfo(
+        uint256,
+        uint256 value
+    ) external view returns (address, uint256) {
         return (_royaltyReceiver, (value * _royaltyPercentage) / BASIS_POINTS);
     }
 
-    function setDefaultRoyalty(address receiver, uint96 percentage) external onlyOwner {
+    function setDefaultRoyalty(
+        address receiver,
+        uint96 percentage
+    ) external onlyOwner {
         require(percentage <= BASIS_POINTS, "Invalid percentage");
         _royaltyReceiver = receiver;
         _royaltyPercentage = percentage;
@@ -136,13 +142,10 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
     function _constructTokenURI(
         uint256 tokenId,
         uint256 blockNumber
-    ) internal       view
-returns (string memory) {
+    ) internal view returns (string memory) {
         require(_exists(tokenId), "Nonexistent token.");
         bytes32 blockHash = getBlockHash(blockNumber);
-        string[8] memory colors = generateEthereumColors(
-            blockHash
-        );
+        string[8] memory colors = generateEthereumColors(blockHash);
 
         string memory svg = generateSVG(colors);
         return generateTokenURI(tokenId, svg, blockNumber);
@@ -155,7 +158,6 @@ returns (string memory) {
     ) internal view returns (string memory) {
         bytes memory svgBytes = abi.encodePacked(svg);
         string memory svgBase64 = Base64.encode(svgBytes);
-        console.log(svgBase64);
 
         string memory json = packJSONString(
             tokenId,
@@ -163,7 +165,6 @@ returns (string memory) {
             blockNumber,
             baseUrl
         );
-        console.log(json);
         string memory finalUri = string(
             abi.encodePacked("data:application/json;base64,", json)
         );
@@ -187,7 +188,7 @@ returns (string memory) {
         uint256 blockNumber,
         string memory _baseUrl
     ) public pure returns (string memory) {
-                string memory style ="hey";
+        string memory style = "hey";
 
         string memory name = string(
             abi.encodePacked("ColorHueState Block #", blockNumber.toString())
@@ -234,7 +235,7 @@ returns (string memory) {
     function updateDevAddress(address _address) external onlyOwnerOrDev {
         devAddress = _address;
     }
-    
+
     function generateSVG(
         string[8] memory colors
     ) public pure returns (string memory) {
@@ -255,7 +256,8 @@ returns (string memory) {
             uint256(0)
         ];
 
-        string memory html = '<svg xmlns="http://www.w3.org/2000/svg" height="800" width="800">';
+        string
+            memory html = '<svg xmlns="http://www.w3.org/2000/svg" height="800" width="800">';
 
         for (uint8 i = 0; i < 4; i++) {
             string memory start = colors[i * 2];
@@ -268,21 +270,21 @@ returns (string memory) {
             html = string(
                 abi.encodePacked(
                     html,
-                    "<defs><radialGradient id=\"grad",
+                    '<defs><radialGradient id="grad',
                     Strings.toString(i),
-                    "\" cx=\"50%\" cy=\"50%\" r=\"50%\" fx=\"50%\" fy=\"50%\"><stop offset=\"",
+                    '" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="',
                     Strings.toString(ps[i]),
-                    "%\" style=\"stop-color:",
+                    '%" style="stop-color:',
                     start,
-                    ";stop-opacity:1\"></stop><stop offset=\"100%\" style=\"stop-color:",
+                    ';stop-opacity:1"></stop><stop offset="100%" style="stop-color:',
                     end,
-                    ";stop-opacity:1\"></stop></radialGradient></defs><circle cx=\"400\" cy=\"400\" rx=\"",
+                    ';stop-opacity:1"></stop></radialGradient></defs><circle cx="400" cy="400" rx="',
                     Strings.toString(temp3),
-                    "\" r=\"",
+                    '" r="',
                     Strings.toString(temp3),
-                    "\" fill=\"url(#grad",
+                    '" fill="url(#grad',
                     Strings.toString(i),
-                    ")\" />"
+                    ')" />'
                 )
             );
         }
@@ -292,7 +294,7 @@ returns (string memory) {
         return html;
     }
 
-        function generateEthereumColors(
+    function generateEthereumColors(
         bytes32 blockHash
     ) public pure returns (string[8] memory) {
         string[8] memory ethereumColors;
@@ -342,7 +344,6 @@ returns (string memory) {
         return string(result);
     }
 
-
     function getBlockHash(uint256 blockNumber) public view returns (bytes32) {
         if (blockNumber == block.number) {
             return blockhash(block.number - 1);
@@ -355,9 +356,9 @@ returns (string memory) {
         }
     }
 
-    
-
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
