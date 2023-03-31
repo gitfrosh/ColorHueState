@@ -9,24 +9,26 @@ import Link from "next/link";
 import { render_circles } from "../utils";
 import SVG from "react-inlinesvg";
 import { useWindowSize } from "../hooks";
+import { Gallery } from "@/components/Gallery";
 export default function Home() {
   const { address } = useAccount();
   const [blockData, setBlockData] = useState<any>();
   const [caughtBlock, catchBlock] = useState<any>();
   const provider = useProvider();
-  const blockDataHash = useMemo(() => blockData?.hash?.slice(2), [blockData]);
+  // const blockDataHash = useMemo(() => blockData?.hash?.slice(2), [blockData]);
   const { data: signer } = useSigner();
   const [svg, setSVG] = useState<string>();
+  const [isMinting, toggleMinting] = useState(false);
   const contract = new ethers.Contract(
     constants.NFT_ADDRESS,
     constants.NFT_ABI
   );
   const size = useWindowSize();
-  const caughtBlockSvg = useMemo(
-    () => render_circles(caughtBlock?.hash),
-    [blockData?.hash]
-  );
-  console.log(svg);
+  // const caughtBlockSvg = useMemo(
+  //   () => render_circles(caughtBlock?.hash),
+  //   [caughtBlock]
+  // );
+  console.log({ caughtBlock });
   useEffect(() => {
     const svg = render_circles(blockData?.hash);
     setSVG(svg);
@@ -41,17 +43,23 @@ export default function Home() {
     }
   };
 
-  console.log(caughtBlockSvg);
-
   const mint = async () => {
-    const tx = await contract
-      .connect(signer as Signer)
-      .mint(caughtBlock?.number, {
-        value: ethers.utils.parseEther("0.001"),
-        gasLimit: 10000000,
-      });
-    const result = await tx.wait();
-    console.log(result);
+    toggleMinting(true);
+
+    try {
+      const tx = await contract
+        .connect(signer as Signer)
+        .mint(caughtBlock?.number, {
+          value: ethers.utils.parseEther("0.001"),
+          gasLimit: 10000000,
+        });
+      const result = await tx.wait();
+      console.log(result);
+      toggleMinting(false);
+    } catch (error) {
+      console.log("ERROR: ", error);
+      toggleMinting(false);
+    }
   };
 
   useEffect(() => {
@@ -87,9 +95,9 @@ export default function Home() {
         <section className="ml-400 bg-black parent-element flex justify-center items-center">
           {blockData ? (
             <div
-              // className="mx-auto"
               style={{
-                width: size?.width,
+                width: size?.width < 1000 ? size?.width : 1000,
+                maxHeight: size?.height,
 
                 position: "relative",
               }}
@@ -112,25 +120,29 @@ export default function Home() {
               </svg>
             </button>
             <div className="relative">
-              {/* <SVG
-                className="absolute top-0 left-0 w-full h-auto"
-                height="200"
-                width="200"
-                loader={<span>Loading...</span>}
-                src={caughtBlockSvg || ""}
-                title={`Block #${caughtBlock?.number}`}
-              /> */}
               {`You chose Block #${caughtBlock?.number}`!}
+              {/* <div
+                style={{
+                  width: 100,
+                  height: 100,
+                  position: "relative",
+                  border: "1px solid white",
+                }}
+                dangerouslySetInnerHTML={{ __html: caughtBlock.svg || "" }}
+              /> */}
               <br />
-              <p>Ready to mint?</p>
+              <p>Ready to mint? (0.001 ETH + gas)</p>
               <br />
               <button
+                disabled={isMinting}
                 onClick={() => {
                   mint();
                 }}
-                className="bg-transparent hover:bg-white text-white font-semibold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded"
+                className={`${
+                  isMinting && "cursor-not-allowed"
+                } bg-transparent hover:bg-white text-white font-semibold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded`}
               >
-                Mint
+                {isMinting ? "Loading.." : "Mint"}
               </button>
             </div>
           </div>
@@ -176,7 +188,11 @@ export default function Home() {
                 {address && (
                   <button
                     onClick={() => {
-                      catchBlock(blockData);
+                      const svgCopy = `${svg}`;
+                      catchBlock({
+                        number: blockData?.number,
+                        svg: svgCopy,
+                      });
                     }}
                     className="bg-transparent hover:bg-white text-white font-semibold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded"
                   >
@@ -192,11 +208,11 @@ export default function Home() {
       <div className="flex flex-col h-screen">
         <section
           id="about"
-          className="h-screen p-12 bg-black grid grid-cols-1 md:grid-cols-2"
+          className="p-12 bg-black grid grid-cols-1 md:grid-cols-2"
         >
           <div>
             <h2 className="text-xl text-white font-bold mb-4">ColorHueState</h2>
-            <p className="text-white">
+            <div className="text-white">
               ColorHueState is a cutting-edge digital art project that
               seamlessly blends the worlds of blockchain technology and visual
               aesthetics. Drawing inspiration from the dynamic and ever-evolving
@@ -222,11 +238,11 @@ export default function Home() {
               dynamic dance of colors, as ColorHueState captures the fluidity of
               the digital realm and transforms it into a visual symphony for the
               senses.
-            </p>
+            </div>
           </div>
           <div>
             {/* <h2 className="text-lg font-bold mb-4">Column 2</h2> */}
-            <p className="text-white">
+            <div className="text-white">
               As a testament to the beauty of decentralized networks,
               ColorHueState transcends the boundaries of conventional art,
               inviting viewers to ponder the intricate connections between
@@ -239,13 +255,19 @@ export default function Home() {
               ephemeral masterpiece. Immerse yourself in the dynamic dance of
               colors, as ColorHueState captures the fluidity of the digital
               realm and transforms it into a visual symphony for the senses.
-            </p>
+            </div>
           </div>
         </section>
-        <footer className="h-16 bg-gray-900 text-white flex items-center justify-center">
-          © {new Date().getFullYear()} Jurgen Ostarhild
-        </footer>
       </div>
+      <div>
+        <section className="position: relative">
+          <Gallery />
+        </section>
+      </div>
+
+      <footer className="h-16 bg-gray-900 text-white flex items-center justify-center">
+        © {new Date().getFullYear()} Jurgen Ostarhild
+      </footer>
     </>
   );
 }

@@ -114,3 +114,7 @@ a {
     color-scheme: dark;
   }
 }
+
+svg {
+  max-height: 100%;
+}

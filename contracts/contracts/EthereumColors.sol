@@ -8,7 +8,8 @@ import "@openzeppelin/contracts/utils/Base64.sol";
 contract EthereumColors {
     function generateEthereumColors(
         bytes32 blockHash
-    ) external returns (string[8] memory) {
+    ) external       view
+returns (string[8] memory) {
         string[8] memory ethereumColors;
         string memory blockHashString = bytes32ToLiteralString(blockHash);
         for (uint256 i = 0; i < ethereumColors.length; i++) {
@@ -64,7 +65,7 @@ contract EthereumColors {
         string memory str,
         uint startIndex,
         uint endIndex
-    ) public view returns (string memory) {
+    ) public pure returns (string memory) {
         bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex - startIndex);
 

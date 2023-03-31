@@ -1,3 +1,19 @@
+/**
+
+     *** ***     
+  *          *   
+ *            *  
+*              * 
+ *            *  
+  *          *   
+     *** ***   
+
+ColorHueState, 2023
+Jurgen Ostarhild
+https://www.colorhuestate.xyz
+
+"ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology." - 2023
+*/
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.12;
@@ -10,9 +26,12 @@ import "@openzeppelin/contracts/utils/Base64.sol";
 import "./SvgGenerator.sol";
 import "./EthereumColors.sol";
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol"; 
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol"; 
+import "@openzeppelin/contracts/utils/introspection/ERC165Storage.sol"; 
 
 /// @author Rike Exner
-contract ColorHueState is Ownable, ERC721Enumerable {
+contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981  {
     SvgGenerator svgGenerator = new SvgGenerator();
     EthereumColors ethereumColors = new EthereumColors();
 
@@ -26,6 +45,11 @@ contract ColorHueState is Ownable, ERC721Enumerable {
 
     // ColorHueState data
     string[256] public svgData;
+
+    // Royalties
+    uint256 private constant BASIS_POINTS = 300;
+    address private _royaltyReceiver;
+    uint256 private _royaltyPercentage;
 
     // Base `external_url` in attributes
     string public baseUrl;
@@ -55,6 +79,37 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     constructor() ERC721("ColorHueState", "CHS") {
         baseUrl = "http://www.colorhuestate.xyz/?tokenid=";
         devAddress = 0x4a7D0d9D2EE22BB6EfE1847CfF07Da4C5F2e3f22; // Rike
+        _registerInterface(type(IERC2981).interfaceId); // Register ERC2981 interface
+
+    }
+
+     function contractURI() public pure returns (string memory) {
+        string memory json = string(
+            abi.encodePacked(
+                '{',
+                '"name": "ColorHueState",',
+                '"description": "ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology.",',
+                '"seller_fee_basis_points": 300,',
+                '"fee_recipient": "0x4a7D0d9D2EE22BB6EfE1847CfF07Da4C5F2e3f22"', // Jurgen
+                '}'
+            )
+        );
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json))));
+    }
+
+     // Implementing ERC2981 royalties
+    function royaltyInfo(uint256, uint256 value)
+        external
+        view
+        returns (address, uint256)
+    {
+        return (_royaltyReceiver, (value * _royaltyPercentage) / BASIS_POINTS);
+    }
+
+    function setDefaultRoyalty(address receiver, uint256 percentage) external onlyOwner {
+        require(percentage <= BASIS_POINTS, "Invalid percentage");
+        _royaltyReceiver = receiver;
+        _royaltyPercentage = percentage;
     }
 
     function updateToken(
@@ -103,11 +158,11 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     ) internal returns (string memory) {
         require(_exists(tokenId), "Nonexistent token.");
         bytes32 blockHash = getBlockHash(blockNumber);
-        string[8] memory ethereumColors = ethereumColors.generateEthereumColors(
+        string[8] memory colors = ethereumColors.generateEthereumColors(
             blockHash
         );
 
-        string memory svg = svgGenerator.generateSVG(ethereumColors);
+        string memory svg = svgGenerator.generateSVG(colors);
         return generateTokenURI(tokenId, svg, blockNumber);
     }
 
@@ -115,10 +170,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         uint256 tokenId,
         string memory svg,
         uint256 blockNumber
-    ) internal returns (string memory) {
-        string memory style = Strings.toString(blockNumber);
-        string memory lightness = "heylightness";
-
+    ) internal view returns (string memory) {
         bytes memory svgBytes = abi.encodePacked(svg);
         string memory svgBase64 = Base64.encode(svgBytes);
         console.log(svgBase64);
@@ -126,8 +178,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         string memory json = packJSONString(
             tokenId,
             svgBase64,
-            style,
-            lightness,
+            blockNumber,
             baseUrl
         );
         string memory finalUri = string(
@@ -150,23 +201,20 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     function packJSONString(
         uint256 tokenId,
         string memory encodedSVG,
-        string memory style,
-        string memory lightness,
+        uint256 blockNumber,
         string memory _baseUrl
-    ) public view returns (string memory) {
-        string memory color = "#000000";
+    ) public pure returns (string memory) {
         string memory name = string(
-            abi.encodePacked("ColorHueState Block #", tokenId.toString())
+            abi.encodePacked("ColorHueState Block #", blockNumber.toString())
         );
         string memory description = string(
             abi.encodePacked(
                 "ColorHueState Block #",
-                block.number.toString(),
-                ". ColorHueState ...",
+                blockNumber.toString(),
+                ". ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology.",
                 tokenId.toString()
             )
         );
-
         return
             Base64.encode(
                 bytes(
@@ -178,8 +226,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
                             description,
                             '", "image":"data:image/svg+xml;base64,',
                             encodedSVG,
-                            '", "attributes":[{"trait_type":"Style","value":"',
-                            style,
                             '"}]',
                             bytes(_baseUrl).length > 0
                                 ? string(
@@ -231,5 +277,15 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         } else {
             return bytes32(0);
         }
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(IERC165, ERC165Storage, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }
