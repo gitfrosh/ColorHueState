@@ -10,12 +10,12 @@ export function render_circles(hash) {
         // console.log(etherium_colors[i])
     }
 
-    var w = 700;
-    var h = 700;
+    var w = 800;
+    var h = 800;
 
     // var diameters = [0.0, 0.25, 0.5, 0.75, 0.98];
 
-    var html = `<svg  viewbox="0 0 700 700">`;
+    var html = `<svg width="800" height="800" >`;
     // for (var i = 0; i < diameters.length - 1; i++) {
     //     var start = etherium_colors[i * 2];
     //     var end = etherium_colors[i * 2 + 1];
@@ -23,7 +23,7 @@ export function render_circles(hash) {
 
     // }
     // var D = Math.floor(Math.min(w, h));
-    var D = 400;
+    var D = 300;
     var rs = [200, 155, 110, 61];
     var ps = [75, 75, 75, 0];
     // console.log({ D })

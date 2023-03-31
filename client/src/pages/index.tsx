@@ -100,7 +100,7 @@ export default function Home() {
           {blockData ? (
             <div
               style={{
-                width: size?.width < 1000 ? size?.width : 1000,
+                // width: size?.width < 1000 ? size?.width : 1000,
                 maxHeight: size?.height,
 
                 position: "relative",
