@@ -33,6 +33,9 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
 
     using Strings for uint256;
 
+    // Adding blockNumber mapping to track minted blockNumbers
+    mapping(uint256 => bool) private _mintedBlockNumbers;
+
     // Mint price
     uint96 public price = 0.001 ether;
 
@@ -127,11 +130,12 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
     }
 
     function mint(uint256 blockNumber) external payable {
+        require(!_mintedBlockNumbers[blockNumber], "BlockNumber has already been minted.");
         _tokenIdCounter += 1;
         uint256 newItemId = _tokenIdCounter;
-
         require(saleActive, "Sale not active.");
         require(msg.value >= price, "Not enough Ether sent.");
+        _mintedBlockNumbers[blockNumber] = true;
 
         _mint(msg.sender, newItemId);
         _tokenURIs[newItemId] = _constructTokenURI(newItemId, blockNumber);
