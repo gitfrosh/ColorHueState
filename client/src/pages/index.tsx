@@ -17,7 +17,7 @@ export default function Home() {
   const provider = useProvider();
   // const blockDataHash = useMemo(() => blockData?.hash?.slice(2), [blockData]);
   const { data: signer } = useSigner();
-  const [isMinted, setMinted] = useState(false);
+  const [isMinted, setMinted] = useState<boolean | string | undefined>(false);
   const [svg, setSVG] = useState<string>();
   const [isMinting, toggleMinting] = useState(false);
   const contract = new ethers.Contract(
@@ -140,7 +140,7 @@ export default function Home() {
                 dangerouslySetInnerHTML={{ __html: caughtBlock.svg || "" }}
               /> */}
               <br />
-              {!isMinted &&<p>Ready to mint? (0.001 ETH + gas)</p>}
+              {!isMinted && <p>Ready to mint? (0.001 ETH + gas)</p>}
               <br />
               {!isMinted && (
                 <button
@@ -160,7 +160,7 @@ export default function Home() {
                   target={"_blank"}
                   href={`https://goerli.etherscan.io/tx/${isMinted}`}
                 >
-                  > View transaction
+                  .. View transaction
                 </a>
               )}
             </div>

@@ -28,8 +28,8 @@ export function Gallery() {
 
   return (
     <div className="border grid grid-cols-4 gap-4">
-      {nfts?.map((nft: any) => (
-        <div className="relative bg-black">
+      {nfts?.map((nft: any, i: number) => (
+        <div key={i} className="relative bg-black">
           <a href="">
             <img src={nft.media[0]?.thumbnail} />
           </a>
