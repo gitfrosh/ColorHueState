@@ -8,19 +8,20 @@ import { useAccount, useProvider, useSigner } from "wagmi";
 import Link from "next/link";
 import { render_circles } from "../utils";
 import SVG from "react-inlinesvg";
-
+import { useWindowSize } from "../hooks";
 export default function Home() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const [blockData, setBlockData] = useState<any>();
   const [caughtBlock, catchBlock] = useState<any>();
   const provider = useProvider();
-
+  const blockDataHash = useMemo(() => blockData?.hash?.slice(2), [blockData]);
   const { data: signer } = useSigner();
   const [svg, setSVG] = useState<string>();
   const contract = new ethers.Contract(
     constants.NFT_ADDRESS,
     constants.NFT_ABI
   );
+  const size = useWindowSize();
   const caughtBlockSvg = useMemo(
     () => render_circles(caughtBlock?.hash),
     [blockData?.hash]
@@ -64,7 +65,7 @@ export default function Home() {
       }
     );
   }, []);
-  console.log(blockData);
+  console.log(size);
   return (
     <>
       <Head>
@@ -73,6 +74,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <div className="flex flex-col h-screen">
         <header className="h-16 p-10 bg-black flex items-center justify-between">
           <Link className="ml-4" scroll={false} href="#about">
@@ -82,15 +84,20 @@ export default function Home() {
             <ConnectButton />
           </span>
         </header>
-        <section className="flex-grow bg-black parent-element grid place-items-center">
-          <SVG
-            style={{ top: "-300px" }}
-            height="auto"
-            width="100%"
-            loader={<span>Loading...</span>}
-            src={svg || ""}
-            title={`Block #${blockData?.number}`}
-          />
+        <section className="ml-400 bg-black parent-element flex justify-center items-center">
+          {blockData ? (
+            <div
+              // className="mx-auto"
+              style={{
+                width: size?.width,
+
+                position: "relative",
+              }}
+              dangerouslySetInnerHTML={{ __html: svg || "" }}
+            />
+          ) : (
+            "Loading..."
+          )}
         </section>
         {!!caughtBlock && (
           <div className="w-400 h-400 absolute bottom-40 right-16 bg-black text-white border border-white rounded p-4 flex items-center">
@@ -128,61 +135,66 @@ export default function Home() {
             </div>
           </div>
         )}
-        <section className="m-16 h-12 bg-black text-white">
-          <div className="h-16 bg-black text-white flex items-center justify-between">
-            <div className="mb-56">
-              <p>
-                Block # <span>{blockData?.number}</span>
-              </p>
-              <p>
-                Hash #{" "}
-                <span>
-                  {blockData?.hash?.substring(0, 6)}
-                  <br />
-                  {blockData?.hash?.substring(6, 12)}
-                  <br />
-                  {blockData?.hash?.substring(12, 18)}
-                  <br />
-                  {blockData?.hash?.substring(18, 24)}
-                  <br />
-                  {blockData?.hash?.substring(24, 30)}
-                  <br />
-                  {blockData?.hash?.substring(30, 36)}
-                  <br />
-                  {blockData?.hash?.substring(36, 42)}
-                  <br />
-                  {blockData?.hash?.substring(42, 48)}
-                  <br />
-                  {blockData?.hash?.substring(48, 54)}
-                  <br />
-                  {blockData?.hash?.substring(54, 60)}
-                  <br />
-                  {blockData?.hash?.substring(60, 64)}
-                </span>
-              </p>
-              <p>
-                Time # <span>{blockData?.timestamp}</span>
-              </p>
+        {blockData && (
+          <section className="ml-16 mr-16 h-12 bg-black text-white">
+            <div className="h-16 bg-black text-white flex items-center justify-between">
+              <div className="pb-10">
+                <p>
+                  Block # <span>{blockData?.number}</span>
+                </p>
+                {/* <p>
+                  Hash #{" "}
+                  <span>
+                    {blockDataHash?.substring(0, 6)}
+                    <br />
+                    {blockDataHash?.substring(6, 12)}
+                    <br />
+                    {blockDataHash?.substring(12, 18)}
+                    <br />
+                    {blockDataHash?.substring(18, 24)}
+                    <br />
+                    {blockDataHash?.substring(24, 30)}
+                    <br />
+                    {blockDataHash?.substring(30, 36)}
+                    <br />
+                    {blockDataHash?.substring(36, 42)}
+                    <br />
+                    {blockDataHash?.substring(42, 48)}
+                    <br />
+                    {blockDataHash?.substring(48, 54)}
+                    <br />
+                    {blockDataHash?.substring(54, 60)}
+                    <br />
+                    {blockDataHash?.substring(60, 64)}
+                  </span>
+                </p>
+                <p>
+                  Time # <span>{blockData?.timestamp}</span>
+                </p> */}
+              </div>
+              <div className="pb-12">
+                {address && (
+                  <button
+                    onClick={() => {
+                      catchBlock(blockData);
+                    }}
+                    className="bg-transparent hover:bg-white text-white font-semibold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded"
+                  >
+                    {!caughtBlock ? "Catch!" : "Catch new one!"}
+                  </button>
+                )}
+              </div>
             </div>
-            <div>
-              {address && (
-                <button
-                  onClick={() => {
-                    catchBlock(blockData);
-                    // mint();
-                  }}
-                  className="bg-transparent hover:bg-white text-white font-semibold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded"
-                >
-                  {!caughtBlock ? "Catch!" : "Catch new one!"}
-                </button>
-              )}
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
+
       <div className="flex flex-col h-screen">
-        <section id="about" className="h-screen p-12 bg-black flex">
-          <div className="w-1/2 p-4">
+        <section
+          id="about"
+          className="h-screen p-12 bg-black grid grid-cols-1 md:grid-cols-2"
+        >
+          <div>
             <h2 className="text-xl text-white font-bold mb-4">ColorHueState</h2>
             <p className="text-white">
               ColorHueState is a cutting-edge digital art project that
@@ -212,7 +224,7 @@ export default function Home() {
               senses.
             </p>
           </div>
-          <div className="w-1/2 p-4">
+          <div>
             {/* <h2 className="text-lg font-bold mb-4">Column 2</h2> */}
             <p className="text-white">
               As a testament to the beauty of decentralized networks,
