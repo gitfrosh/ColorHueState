@@ -22,12 +22,10 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
-import "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Storage.sol";
+import "hardhat/console.sol";
 
 /// @author Rike Exner
-contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
+contract ColorHueState is Ownable, ERC721Enumerable {
     uint256 private _tokenIdCounter;
     mapping(uint256 => string) private _tokenURIs;
 
@@ -61,18 +59,9 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
     event ColorHueStateCreated(uint256 indexed tokenId);
     event TokenUpdated(uint256 tokenId);
 
-    modifier onlyOwnerOrDev() {
-        require(
-            owner() == msg.sender || devAddress == msg.sender,
-            "Caller is not owner or dev."
-        );
-        _;
-    }
-
     constructor() ERC721("ColorHueState", "CHS") {
-        baseUrl = "http://www.colorhuestate.xyz/?tokenid=";
+        baseUrl = "http://www.colorhuestate.xyz/?blockNumber=";
         devAddress = 0x4a7D0d9D2EE22BB6EfE1847CfF07Da4C5F2e3f22; // Rike
-        _registerInterface(type(IERC2981).interfaceId); // Register ERC2981 interface
     }
 
     function contractURI() external pure returns (string memory) {
@@ -81,8 +70,6 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
                 "{",
                 '"name": "ColorHueState",',
                 '"description": "ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology.",',
-                '"seller_fee_basis_points": 300,',
-                '"fee_recipient": "0x4a7D0d9D2EE22BB6EfE1847CfF07Da4C5F2e3f22"', // Jurgen
                 "}"
             )
         );
@@ -95,24 +82,7 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
             );
     }
 
-    // Implementing ERC2981 royalties
-    function royaltyInfo(
-        uint256,
-        uint256 value
-    ) external view returns (address, uint256) {
-        return (_royaltyReceiver, (value * _royaltyPercentage) / BASIS_POINTS);
-    }
-
-    function setDefaultRoyalty(
-        address receiver,
-        uint96 percentage
-    ) external onlyOwner {
-        require(percentage <= BASIS_POINTS, "Invalid percentage");
-        _royaltyReceiver = receiver;
-        _royaltyPercentage = percentage;
-    }
-
-    function permanentlyFreezeMetadata() external onlyOwnerOrDev {
+    function permanentlyFreezeMetadata() external onlyOwner {
         metadataFrozen = true;
     }
 
@@ -121,16 +91,19 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
         require(payable(owner()).send(amount));
     }
 
-    function updateBaseUrl(string calldata _baseUrl) external onlyOwnerOrDev {
+    function updateBaseUrl(string calldata _baseUrl) external onlyOwner {
         baseUrl = _baseUrl;
     }
 
-    function toggleSale() external onlyOwnerOrDev {
+    function toggleSale() external onlyOwner {
         saleActive = !saleActive;
     }
 
     function mint(uint256 blockNumber) external payable {
-        require(!_mintedBlockNumbers[blockNumber], "BlockNumber has already been minted.");
+        require(
+            !_mintedBlockNumbers[blockNumber],
+            "BlockNumber has already been minted."
+        );
         _tokenIdCounter += 1;
         uint256 newItemId = _tokenIdCounter;
         require(saleActive, "Sale not active.");
@@ -149,33 +122,89 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
     ) internal view returns (string memory) {
         require(_exists(tokenId), "Nonexistent token.");
         bytes32 blockHash = getBlockHash(blockNumber);
-        string[8] memory colors = generateEthereumColors(blockHash);
-
-        string memory svg = generateSVG(colors);
-        return generateTokenURI(tokenId, svg, blockNumber);
+        (
+            string[8] memory colors,
+            string[8] memory attributes
+        ) = generateEthereumColors(blockHash);
+        return generateTokenURI(colors, attributes, blockNumber);
     }
 
     function generateTokenURI(
-        uint256 tokenId,
-        string memory svg,
+        string[8] memory colors,
+        string[8] memory attributes,
         uint256 blockNumber
     ) internal view returns (string memory) {
-        bytes memory svgBytes = abi.encodePacked(svg);
-        string memory svgBase64 = Base64.encode(svgBytes);
-
-        string memory json = packJSONString(
-            tokenId,
-            svgBase64,
-            blockNumber,
-            baseUrl
-        );
-        string memory finalUri = string(
-            abi.encodePacked("data:application/json;base64,", json)
-        );
-        return finalUri;
+        string memory rings = generateRings(colors);
+        string memory ringAttributes = generateRingAttributes(attributes);
+        string memory svg = generateSVG(colors);
+        return packJSONString(svg, blockNumber, rings, ringAttributes);
     }
 
-    function burn(uint256 tokenId) external onlyOwnerOrDev {
+    function generateRingAttributes(
+        string[8] memory attributes
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '", "attributes":[',
+                    generateAttributePair("A", attributes[0], attributes[1]),
+                    ",",
+                    generateAttributePair("B", attributes[2], attributes[3]),
+                    ",",
+                    generateAttributePair("C", attributes[4], attributes[5]),
+                    ",",
+                    generateAttributePair("D", attributes[6], attributes[7]),
+                    "]"
+                )
+            );
+    }
+
+    function generateAttributePair(
+        string memory traitType,
+        string memory attr1,
+        string memory attr2
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '{"trait_type":"',
+                    traitType,
+                    '","value":"',
+                    attr1,
+                    "-",
+                    attr2,
+                    '"}'
+                )
+            );
+    }
+
+    function generateRings(
+        string[8] memory colors
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    "Ring A: ",
+                    colors[0],
+                    "-",
+                    colors[1],
+                    " Ring B: ",
+                    colors[2],
+                    "-",
+                    colors[3],
+                    " Ring C: ",
+                    colors[4],
+                    "-",
+                    colors[5],
+                    " Ring D: ",
+                    colors[6],
+                    "-",
+                    colors[7]
+                )
+            );
+    }
+
+    function burn(uint256 tokenId) external onlyOwner {
         _burn(tokenId);
     }
 
@@ -186,26 +215,55 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
         return _tokenURIs[tokenId];
     }
 
+    function isNumeric(string memory input) public pure returns (bool) {
+        bytes memory inputBytes = bytes(input);
+
+        for (uint i = 0; i < inputBytes.length; i++) {
+            bytes1 char = inputBytes[i];
+            // Check if the character is a number (0-9)
+            if (char < 0x30 || char > 0x39) {
+                return false;
+            }
+        }
+        return inputBytes.length > 0;
+    }
+
+    function isAlpha(string memory input) public pure returns (bool) {
+        bytes memory inputBytes = bytes(input);
+
+        for (uint i = 0; i < inputBytes.length; i++) {
+            bytes1 char = inputBytes[i];
+
+            // Check if the character is a letter (A-Z or a-z)
+            if (
+                !((char >= 0x41 && char <= 0x5A) ||
+                    (char >= 0x61 && char <= 0x7A))
+            ) {
+                return false;
+            }
+        }
+
+        return inputBytes.length > 0;
+    }
+
     function packJSONString(
-        uint256 tokenId,
         string memory encodedSVG,
         uint256 blockNumber,
-        string memory _baseUrl
-    ) public pure returns (string memory) {
-        string memory style = "hey";
-
+        string memory rings,
+        string memory ringAttributes
+    ) public view returns (string memory) {
         string memory name = string(
-            abi.encodePacked("ColorHueState Block #", blockNumber.toString())
+            abi.encodePacked("ColorHueState Block No. ", blockNumber.toString())
         );
         string memory description = string(
             abi.encodePacked(
-                "ColorHueState Block #",
+                "ColorHueState Block No. ",
                 blockNumber.toString(),
-                ". ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology.",
-                tokenId.toString()
+                " || ",
+                rings
             )
         );
-        return
+        string memory base64 =
             Base64.encode(
                 bytes(
                     string(
@@ -216,15 +274,13 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
                             description,
                             '", "image":"data:image/svg+xml;base64,',
                             encodedSVG,
-                            '", "attributes":[{"trait_type":"Style","value":"',
-                            style,
-                            '"}]',
-                            bytes(_baseUrl).length > 0
+                            ringAttributes,
+                            bytes(baseUrl).length > 0
                                 ? string(
                                     abi.encodePacked(
                                         ', "external_url":"',
-                                        _baseUrl,
-                                        tokenId.toString(),
+                                        baseUrl,
+                                        blockNumber.toString(),
                                         '"'
                                     )
                                 )
@@ -234,9 +290,11 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
                     )
                 )
             );
+            console.log(base64);
+            return base64;
     }
 
-    function updateDevAddress(address _address) external onlyOwnerOrDev {
+    function updateDevAddress(address _address) external onlyOwner {
         devAddress = _address;
     }
 
@@ -300,16 +358,25 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
 
     function generateEthereumColors(
         bytes32 blockHash
-    ) public pure returns (string[8] memory) {
+    ) public pure returns (string[8] memory, string[8] memory) {
         string[8] memory ethereumColors;
+        string[8] memory attributes;
+
         string memory blockHashString = bytes32ToLiteralString(blockHash);
         for (uint256 i = 0; i < ethereumColors.length; i++) {
             uint256 start = i * 6 + 1;
             uint256 end = start + 6;
             string memory color = substring(blockHashString, start, end);
+            if (isAlpha(color)) {
+                attributes[i] = "nondigit";
+            } else if (isNumeric(color)) {
+                attributes[i] = "digit";
+            } else {
+                attributes[i] = "mixed";
+            }
             ethereumColors[i] = string.concat("#", color);
         }
-        return ethereumColors;
+        return (ethereumColors, attributes);
     }
 
     function bytes32ToLiteralString(
@@ -362,13 +429,7 @@ contract ColorHueState is Ownable, ERC165Storage, ERC721Enumerable, IERC2981 {
 
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        virtual
-        override(IERC165, ERC165Storage, ERC721Enumerable)
-        returns (bool)
-    {
+    ) public view virtual override(ERC721Enumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
