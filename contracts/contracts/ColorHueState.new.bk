@@ -37,6 +37,11 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     // Mint price
     uint96 public price = 0.001 ether;
 
+    // Royalties
+    uint256 private constant BASIS_POINTS = 300;
+    address private _royaltyReceiver;
+    uint96 private _royaltyPercentage;
+
     // Base `external_url` in attributes
     string public baseUrl;
 
@@ -49,11 +54,14 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     // Internal tokenId tracker
     uint256 private _currentId;
 
+    address private devAddress;
+
     event ColorHueStateCreated(uint256 indexed tokenId);
     event TokenUpdated(uint256 tokenId);
 
     constructor() ERC721("ColorHueState", "CHS") {
-        baseUrl = "http://www.colorhuestate.xyz/?tokenid=";
+        baseUrl = "http://www.colorhuestate.xyz/?blockNumber=";
+        devAddress = 0x4a7D0d9D2EE22BB6EfE1847CfF07Da4C5F2e3f22; // Rike
     }
 
     function contractURI() external pure returns (string memory) {
@@ -74,7 +82,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             );
     }
 
-
     function permanentlyFreezeMetadata() external onlyOwner {
         metadataFrozen = true;
     }
@@ -93,7 +100,10 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     }
 
     function mint(uint256 blockNumber) external payable {
-        require(!_mintedBlockNumbers[blockNumber], "BlockNumber has already been minted.");
+        require(
+            !_mintedBlockNumbers[blockNumber],
+            "BlockNumber has already been minted."
+        );
         _tokenIdCounter += 1;
         uint256 newItemId = _tokenIdCounter;
         require(saleActive, "Sale not active.");
@@ -112,39 +122,26 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     ) internal view returns (string memory) {
         require(_exists(tokenId), "Nonexistent token.");
         bytes32 blockHash = getBlockHash(blockNumber);
-   (
+        (
             string[8] memory colors,
             string[8] memory attributes
         ) = generateEthereumColors(blockHash);
-        string memory svg = generateSVG(colors);
-        return generateTokenURI(colors, attributes, svg, blockNumber);
+        return generateTokenURI(colors, attributes, blockNumber);
     }
 
     function generateTokenURI(
         string[8] memory colors,
         string[8] memory attributes,
-        string memory svg,
         uint256 blockNumber
     ) internal view returns (string memory) {
-        bytes memory svgBytes = abi.encodePacked(svg);
-        string memory svgBase64 = Base64.encode(svgBytes);
+        string memory rings = generateRings(colors);
         string memory ringAttributes = generateRingAttributes(attributes);
-
-
-
-        string memory json = packJSONString(
-            svgBase64,
-            blockNumber,
-            ringAttributes
-        );
-        string memory finalUri = string(
-            abi.encodePacked("data:application/json;base64,", json)
-        );
-        console.log(finalUri);
-        return finalUri;
+        string memory svg = generateSVG(colors);
+        string memory svgBase64 = Base64.encode(abi.encodePacked(svg));
+        return packJSONString(svgBase64, blockNumber, rings, ringAttributes);
     }
 
-        function generateRingAttributes(
+    function generateRingAttributes(
         string[8] memory attributes
     ) internal pure returns (string memory) {
         return
@@ -163,7 +160,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             );
     }
 
-        function generateAttributePair(
+    function generateAttributePair(
         string memory traitType,
         string memory attr1,
         string memory attr2
@@ -182,6 +179,31 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             );
     }
 
+    function generateRings(
+        string[8] memory colors
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    "Ring A: ",
+                    colors[0],
+                    "-",
+                    colors[1],
+                    " Ring B: ",
+                    colors[2],
+                    "-",
+                    colors[3],
+                    " Ring C: ",
+                    colors[4],
+                    "-",
+                    colors[5],
+                    " Ring D: ",
+                    colors[6],
+                    "-",
+                    colors[7]
+                )
+            );
+    }
 
     function burn(uint256 tokenId) external onlyOwner {
         _burn(tokenId);
@@ -194,23 +216,55 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         return _tokenURIs[tokenId];
     }
 
+    function isNumeric(string memory input) public pure returns (bool) {
+        bytes memory inputBytes = bytes(input);
+
+        for (uint i = 0; i < inputBytes.length; i++) {
+            bytes1 char = inputBytes[i];
+            // Check if the character is a number (0-9)
+            if (char < 0x30 || char > 0x39) {
+                return false;
+            }
+        }
+        return inputBytes.length > 0;
+    }
+
+    function isAlpha(string memory input) public pure returns (bool) {
+        bytes memory inputBytes = bytes(input);
+
+        for (uint i = 0; i < inputBytes.length; i++) {
+            bytes1 char = inputBytes[i];
+
+            // Check if the character is a letter (A-Z or a-z)
+            if (
+                !((char >= 0x41 && char <= 0x5A) ||
+                    (char >= 0x61 && char <= 0x7A))
+            ) {
+                return false;
+            }
+        }
+
+        return inputBytes.length > 0;
+    }
+
     function packJSONString(
         string memory encodedSVG,
         uint256 blockNumber,
+        string memory rings,
         string memory ringAttributes
     ) public view returns (string memory) {
-        string memory style = "hey";
-        console.log(ringAttributes);
         string memory name = string(
-            abi.encodePacked("ColorHueState Block #", blockNumber.toString())
+            abi.encodePacked("ColorHueState Block No. ", blockNumber.toString())
         );
         string memory description = string(
             abi.encodePacked(
-                "ColorHueState Block #",
+                "ColorHueState Block No. ",
                 blockNumber.toString(),
-                ". ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology."            )
+                " || ",
+                rings
+            )
         );
-        return
+        string memory base64 =
             Base64.encode(
                 bytes(
                     string(
@@ -237,6 +291,12 @@ contract ColorHueState is Ownable, ERC721Enumerable {
                     )
                 )
             );
+            console.log(base64);
+            return base64;
+    }
+
+    function updateDevAddress(address _address) external onlyOwner {
+        devAddress = _address;
     }
 
     function generateSVG(
@@ -296,39 +356,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
 
         return html;
     }
-
-
-    function isNumeric(string memory input) public pure returns (bool) {
-        bytes memory inputBytes = bytes(input);
-
-        for (uint i = 0; i < inputBytes.length; i++) {
-            bytes1 char = inputBytes[i];
-            // Check if the character is a number (0-9)
-            if (char < 0x30 || char > 0x39) {
-                return false;
-            }
-        }
-        return inputBytes.length > 0;
-    }
-
-    function isAlpha(string memory input) public pure returns (bool) {
-        bytes memory inputBytes = bytes(input);
-
-        for (uint i = 0; i < inputBytes.length; i++) {
-            bytes1 char = inputBytes[i];
-
-            // Check if the character is a letter (A-Z or a-z)
-            if (
-                !((char >= 0x41 && char <= 0x5A) ||
-                    (char >= 0x61 && char <= 0x7A))
-            ) {
-                return false;
-            }
-        }
-
-        return inputBytes.length > 0;
-    }
-
 
     function generateEthereumColors(
         bytes32 blockHash
@@ -399,5 +426,11 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         } else {
             return bytes32(0);
         }
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC721Enumerable) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 }
