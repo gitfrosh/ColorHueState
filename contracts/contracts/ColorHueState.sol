@@ -16,32 +16,23 @@ https://www.colorhuestate.xyz
 */
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.12;
+pragma solidity ^0.8.6;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
-import "hardhat/console.sol";
 
 /// @author Rike Exner
 contract ColorHueState is Ownable, ERC721Enumerable {
     uint256 private _tokenIdCounter;
     mapping(uint256 => string) private _tokenURIs;
 
-    using Strings for uint256;
-
     // Adding blockNumber mapping to track minted blockNumbers
     mapping(uint256 => bool) private _mintedBlockNumbers;
 
-    // Mint price
-    uint96 public price = 0.001 ether;
-
     // Base `external_url` in attributes
     string public baseUrl;
-
-    // Sale status. Toggle to enable minting.
-    bool public saleActive = false;
 
     // Internal tokenId tracker
     uint256 private _currentId;
@@ -68,25 +59,18 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             );
     }
 
-    function withdrawAll() external {
-        uint256 amount = address(this).balance;
-        require(payable(owner()).send(amount));
-    }
-
     function updateBaseUrl(string calldata _baseUrl) external onlyOwner {
         baseUrl = _baseUrl;
     }
 
-    function toggleSale() external onlyOwner {
-        saleActive = !saleActive;
-    }
 
-    function mint(uint256 blockNumber) external payable {
-        require(!_mintedBlockNumbers[blockNumber], "BlockNumber has already been minted.");
+    function mint(uint256 blockNumber) external {
+        require(
+            !_mintedBlockNumbers[blockNumber],
+            "BlockNumber has already been minted."
+        );
         _tokenIdCounter += 1;
         uint256 newItemId = _tokenIdCounter;
-        require(saleActive, "Sale not active.");
-        require(msg.value >= price, "Not enough Ether sent.");
         _mintedBlockNumbers[blockNumber] = true;
 
         _mint(msg.sender, newItemId);
@@ -99,7 +83,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     ) internal view returns (string memory) {
         require(_exists(tokenId), "Nonexistent token.");
         bytes32 blockHash = getBlockHash(blockNumber);
-   (
+        (
             string[8] memory colors,
             string[8] memory attributes
         ) = generateEthereumColors(blockHash);
@@ -113,31 +97,8 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         string memory svg,
         uint256 blockNumber
     ) internal view returns (string memory) {
-        bytes memory svgBytes = abi.encodePacked(svg);
-        string memory svgBase64 = Base64.encode(svgBytes);
-        string memory ringAttributes = generateRingAttributes(attributes);
-        string memory rings = generateRings(colors);
-
-
-
-        string memory json = packJSONString(
-            svgBase64,
-            blockNumber,
-            ringAttributes,
-            rings
-        );
-        string memory finalUri = string(
-            abi.encodePacked("data:application/json;base64,", json)
-        );
-        console.log(finalUri);
-        return finalUri;
-    }
-
-        function generateRingAttributes(
-        string[8] memory attributes
-    ) internal pure returns (string memory) {
-        return
-            string(
+        string memory svgBase64 = Base64.encode(abi.encodePacked(svg));
+        string memory ringAttributes = string(
                 abi.encodePacked(
                     '", "attributes":[',
                     generateAttributePair("A", attributes[0], attributes[1]),
@@ -150,32 +111,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
                     "]"
                 )
             );
-    }
-
-        function generateAttributePair(
-        string memory traitType,
-        string memory attr1,
-        string memory attr2
-    ) internal pure returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    '{"trait_type":"',
-                    traitType,
-                    '","value":"',
-                    attr1,
-                    "-",
-                    attr2,
-                    '"}'
-                )
-            );
-    }
-
-        function generateRings(
-        string[8] memory colors
-    ) internal pure returns (string memory) {
-        return
-            string(
+        string memory rings = string(
                 abi.encodePacked(
                     "Ring A: ",
                     colors[0],
@@ -195,9 +131,71 @@ contract ColorHueState is Ownable, ERC721Enumerable {
                     colors[7]
                 )
             );
+
+        string memory name = string(
+            abi.encodePacked(
+                "ColorHueState Block No. ",
+                uintToString(blockNumber)
+            )
+        );
+        string memory description = string(
+            abi.encodePacked(
+                "ColorHueState Block No. ",
+                uintToString(blockNumber),
+                " ",
+                rings
+            )
+        );
+        string memory json = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '{"name":"',
+                        name,
+                        '", "description":"',
+                        description,
+                        '", "image":"data:image/svg+xml;base64,',
+                        svgBase64,
+                        ringAttributes,
+                        bytes(baseUrl).length > 0
+                            ? string(
+                                abi.encodePacked(
+                                    ', "external_url":"',
+                                    baseUrl,
+                                    uintToString(blockNumber),
+                                    '"'
+                                )
+                            )
+                            : "",
+                        " }"
+                    )
+                )
+            )
+        );
+        string memory finalUri = string(
+            abi.encodePacked("data:application/json;base64,", json)
+        );
+        return finalUri;
     }
 
-
+    function generateAttributePair(
+        string memory traitType,
+        string memory attr1,
+        string memory attr2
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '{"trait_type":"',
+                    traitType,
+                    '","value":"',
+                    attr1,
+                    "-",
+                    attr2,
+                    '"}'
+                )
+            );
+    }
 
     function burn(uint256 tokenId) external onlyOwner {
         _burn(tokenId);
@@ -208,51 +206,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     ) public view override(ERC721) returns (string memory) {
         require(_exists(tokenId), "ERC721: URI query for nonexistent token");
         return _tokenURIs[tokenId];
-    }
-
-    function packJSONString(
-        string memory encodedSVG,
-        uint256 blockNumber,
-        string memory ringAttributes,
-                string memory rings
-    ) public view returns (string memory) {
-        console.log(rings);
-        string memory name = string(
-            abi.encodePacked("ColorHueState Block No. ", blockNumber.toString())
-        );
-        string memory description = string(
-            abi.encodePacked(
-                "ColorHueState Block No. ",
-                blockNumber.toString(),
-                " ", rings)
-        );
-        return
-            Base64.encode(
-                bytes(
-                    string(
-                        abi.encodePacked(
-                            '{"name":"',
-                            name,
-                            '", "description":"',
-                            description,
-                            '", "image":"data:image/svg+xml;base64,',
-                            encodedSVG,
-                            ringAttributes,
-                            bytes(baseUrl).length > 0
-                                ? string(
-                                    abi.encodePacked(
-                                        ', "external_url":"',
-                                        baseUrl,
-                                        blockNumber.toString(),
-                                        '"'
-                                    )
-                                )
-                                : "",
-                            " }"
-                        )
-                    )
-                )
-            );
     }
 
     function generateSVG(
@@ -313,7 +266,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         return html;
     }
 
-
     function isNumeric(string memory input) public pure returns (bool) {
         bytes memory inputBytes = bytes(input);
 
@@ -345,7 +297,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         return inputBytes.length > 0;
     }
 
-
     function generateEthereumColors(
         bytes32 blockHash
     ) public pure returns (string[8] memory, string[8] memory) {
@@ -364,7 +315,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             } else {
                 attributes[i] = "mixed";
             }
-            ethereumColors[i] = string.concat("#", color);
+            ethereumColors[i] = string(abi.encodePacked("#", color));
         }
         return (ethereumColors, attributes);
     }
@@ -416,4 +367,25 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             return bytes32(0);
         }
     }
+
+    function uintToString(uint256 value) public pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 length;
+        while (temp != 0) {
+            length++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(length);
+        while (value != 0) {
+            length--;
+            buffer[length] = bytes1(uint8(48 + (value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+
 }
+

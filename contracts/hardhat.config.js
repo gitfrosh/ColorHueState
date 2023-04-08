@@ -1,10 +1,11 @@
 require("@nomiclabs/hardhat-ethers");
+require("hardhat-gas-reporter");
 const dotenv = require("dotenv");
 dotenv.config();
 
 module.exports = {
   solidity: {
-    version: "0.8.12",
+    version: "0.8.6",
     settings: {
       optimizer: {
         enabled: true,

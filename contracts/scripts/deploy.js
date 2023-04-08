@@ -4,9 +4,6 @@ const main = async () => {
   await nftContract.deployed();
   console.log("Contract deployed to:", nftContract.address);
 
-  let activate = await nftContract.toggleSale()
-  await activate.wait()
-
   // let mint = await nftContract.mint()
   // await mint.wait()
   // console.log("Minted NFT #1")

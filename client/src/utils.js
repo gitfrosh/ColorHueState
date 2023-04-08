@@ -1,21 +1,19 @@
 
 
 export function render_circles(hash) {
-    console.log({ hash })
     if (!hash) return;
     var etherium_colors = new Array(8);
     const hashMinus0x = hash.slice(2);
     for (var i = 0; i < etherium_colors.length; i++) {
 
         etherium_colors[i] = "#" + hashMinus0x.substring(i * 6, i * 6 + 6);
-        console.log(etherium_colors[i])
     }
 
     var w = 800;
     var h = 800;
 
 
-    var html = `<svg width="800" height="800" >`;
+    var html = `<svg class="svg-content" width="800" height="800" viewBox="0 0 800 800" >`;
     var D = 300;
     var rs = [200, 155, 110, 61];
     var ps = [75, 75, 75, 0];

@@ -7,7 +7,6 @@ import { constants } from "../constants";
 import { useAccount, useProvider, useSigner } from "wagmi";
 import Link from "next/link";
 import { render_circles } from "../utils";
-import { useWindowSize } from "../hooks";
 import { Gallery } from "@/components/Gallery";
 
 export default function Home() {
@@ -23,8 +22,7 @@ export default function Home() {
     constants.NFT_ADDRESS,
     constants.NFT_ABI
   );
-  const size = useWindowSize();
-  console.log({ caughtBlock });
+
   useEffect(() => {
     const svg = render_circles(blockData?.hash);
     setSVG(svg);
@@ -45,15 +43,11 @@ export default function Home() {
     try {
       const tx = await contract
         .connect(signer as Signer)
-        .mint(caughtBlock?.number, {
-          value: ethers.utils.parseEther("0.001"),
-          gasLimit: 10000000,
-        });
+        .mint(caughtBlock?.number);
       const result = await tx.wait();
       if (result?.transactionHash) {
         setMinted(result?.transactionHash);
       }
-      console.log(result);
       toggleMinting(false);
     } catch (error) {
       console.log("ERROR: ", error);
@@ -72,7 +66,6 @@ export default function Home() {
       }
     );
   }, []);
-  console.log(blockData?.hash);
   return (
     <>
       <Head>
@@ -88,26 +81,24 @@ export default function Home() {
             <span className="text-white">about</span>
           </Link>
           <span className="mr-4">
-            <ConnectButton />
+            <ConnectButton showBalance={false} chainStatus="none" />
           </span>
         </header>
-        <section className="ml-400 bg-black parent-element flex justify-center items-center">
+        <section className="flex-grow">
           {blockData ? (
             <div
-              style={{
-                // width: size?.width < 1000 ? size?.width : 1000,
-                maxHeight: size?.height,
-
-                position: "relative",
-              }}
+              className="svg-container"
               dangerouslySetInnerHTML={{ __html: svg || "" }}
             />
           ) : (
-            "Loading..."
+            <div className="pl-12 mt-24 text-white">Loading...</div>
           )}
         </section>
         {!!caughtBlock && (
-          <div className="w-400 h-400 absolute bottom-40 right-16 bg-black text-white border border-white rounded p-4 flex items-center">
+          <div
+            className="absolute p-6 top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+          h-300 bg-black text-white border border-white rounded"
+          >
             <button
               onClick={() => {
                 catchBlock(undefined);
@@ -125,17 +116,9 @@ export default function Home() {
             </button>
             <div className="relative">
               {`You chose Block #${caughtBlock?.number}`!}
-              {/* <div
-                style={{
-                  width: 100,
-                  height: 100,
-                  position: "relative",
-                  border: "1px solid white",
-                }}
-                dangerouslySetInnerHTML={{ __html: caughtBlock.svg || "" }}
-              /> */}
+
               <br />
-              {!isMinted && <p>Ready to mint? (0.001 ETH + gas)</p>}
+              {!isMinted && <p>Ready to mint? (only gas fees)</p>}
               <br />
               {!isMinted && (
                 <button
@@ -162,9 +145,9 @@ export default function Home() {
           </div>
         )}
         {blockData && (
-          <section className="ml-16 mr-16 h-12 bg-black text-white">
+          <section className="mb-10 ml-16 mr-16 h-12 bg-black text-white">
             <div className="h-16 bg-black text-white flex items-center justify-between">
-              <div className="pb-10">
+              <div className="">
                 <p>
                   Block # <span>{blockData?.number}</span>
                 </p>
@@ -198,7 +181,7 @@ export default function Home() {
                   Time # <span>{blockData?.timestamp}</span>
                 </p> */}
               </div>
-              <div className="pb-12">
+              <div className="">
                 {address && (
                   <button
                     onClick={() => {
@@ -219,14 +202,14 @@ export default function Home() {
         )}
       </div>
 
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col min-h-screen">
         <section
           id="about"
           className="p-12 bg-black grid grid-cols-1 md:grid-cols-2"
         >
           <div>
             <h2 className="text-xl text-white font-bold mb-4">ColorHueState</h2>
-            <div className="text-white pr-5">
+            <div className="text-white p-2">
               ColorHueState is a cutting-edge digital art project that
               seamlessly blends the worlds of blockchain technology and visual
               aesthetics. Drawing inspiration from the dynamic and ever-evolving
@@ -255,8 +238,7 @@ export default function Home() {
             </div>
           </div>
           <div>
-            {/* <h2 className="text-lg font-bold mb-4">Column 2</h2> */}
-            <div className="text-white pl-5">
+            <div className="text-white p-2">
               As a testament to the beauty of decentralized networks,
               ColorHueState transcends the boundaries of conventional art,
               inviting viewers to ponder the intricate connections between
@@ -274,11 +256,10 @@ export default function Home() {
         </section>
       </div>
       <div>
-        <section className="position: relative">
+        <section className="h-30">
           <Gallery />
         </section>
       </div>
-
       <footer className="h-16 bg-gray-900 text-white flex items-center justify-center">
         © {new Date().getFullYear()} Jurgen Ostarhild
       </footer>

@@ -17,7 +17,6 @@ describe("ColorHueState", function () {
       const Contract = await ethers.getContractFactory("ColorHueState");
       const contractDeployed = await Contract.deploy();
 
-      contractDeployed.toggleSale();
       await mine(8746179);
       contractDeployed.mint(8746179, { value: 1000000000000000, gasLimit: 10000000 });
 

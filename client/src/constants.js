@@ -1,5 +1,5 @@
 export const constants = {
-    NFT_ADDRESS: "0x9F1f20563cA45d4c9a93Fb08B9976E439e0F5001",
+    NFT_ADDRESS: "0xAf23867110fD4bACbD2A1C3Bb70AE4D48B7AB68D",
     NFT_ABI: [
         {
             "inputs": [],
@@ -61,19 +61,6 @@ export const constants = {
             "inputs": [
                 {
                     "indexed": true,
-                    "internalType": "uint256",
-                    "name": "tokenId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "ColorHueStateCreated",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
                     "internalType": "address",
                     "name": "previousOwner",
                     "type": "address"
@@ -86,19 +73,6 @@ export const constants = {
                 }
             ],
             "name": "OwnershipTransferred",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "tokenId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "TokenUpdated",
             "type": "event"
         },
         {
@@ -192,6 +166,81 @@ export const constants = {
         {
             "inputs": [
                 {
+                    "internalType": "bytes32",
+                    "name": "data",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "bytes32ToLiteralString",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "result",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "pure",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "contractURI",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "pure",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "bytes32",
+                    "name": "blockHash",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "generateEthereumColors",
+            "outputs": [
+                {
+                    "internalType": "string[8]",
+                    "name": "",
+                    "type": "string[8]"
+                },
+                {
+                    "internalType": "string[8]",
+                    "name": "",
+                    "type": "string[8]"
+                }
+            ],
+            "stateMutability": "pure",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string[8]",
+                    "name": "colors",
+                    "type": "string[8]"
+                }
+            ],
+            "name": "generateSVG",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "pure",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
                     "internalType": "uint256",
                     "name": "tokenId",
                     "type": "uint256"
@@ -230,6 +279,25 @@ export const constants = {
         {
             "inputs": [
                 {
+                    "internalType": "string",
+                    "name": "input",
+                    "type": "string"
+                }
+            ],
+            "name": "isAlpha",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "pure",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
                     "internalType": "address",
                     "name": "owner",
                     "type": "address"
@@ -252,8 +320,14 @@ export const constants = {
             "type": "function"
         },
         {
-            "inputs": [],
-            "name": "metadataFrozen",
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "input",
+                    "type": "string"
+                }
+            ],
+            "name": "isNumeric",
             "outputs": [
                 {
                     "internalType": "bool",
@@ -261,7 +335,7 @@ export const constants = {
                     "type": "bool"
                 }
             ],
-            "stateMutability": "view",
+            "stateMutability": "pure",
             "type": "function"
         },
         {
@@ -274,7 +348,7 @@ export const constants = {
             ],
             "name": "mint",
             "outputs": [],
-            "stateMutability": "payable",
+            "stateMutability": "nonpayable",
             "type": "function"
         },
         {
@@ -323,59 +397,13 @@ export const constants = {
             "type": "function"
         },
         {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "tokenId",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "string",
-                    "name": "encodedSVG",
-                    "type": "string"
-                },
-                {
-                    "internalType": "string",
-                    "name": "style",
-                    "type": "string"
-                },
-                {
-                    "internalType": "string",
-                    "name": "lightness",
-                    "type": "string"
-                },
-                {
-                    "internalType": "string",
-                    "name": "_baseUrl",
-                    "type": "string"
-                }
-            ],
-            "name": "packJSONString",
-            "outputs": [
-                {
-                    "internalType": "string",
-                    "name": "",
-                    "type": "string"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "permanentlyFreezeMetadata",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
             "inputs": [],
             "name": "price",
             "outputs": [
                 {
-                    "internalType": "uint256",
+                    "internalType": "uint96",
                     "name": "",
-                    "type": "uint256"
+                    "type": "uint96"
                 }
             ],
             "stateMutability": "view",
@@ -440,19 +468,6 @@ export const constants = {
             "type": "function"
         },
         {
-            "inputs": [],
-            "name": "saleActive",
-            "outputs": [
-                {
-                    "internalType": "bool",
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
             "inputs": [
                 {
                     "internalType": "address",
@@ -473,9 +488,9 @@ export const constants = {
         {
             "inputs": [
                 {
-                    "internalType": "bytes32",
+                    "internalType": "string",
                     "name": "str",
-                    "type": "bytes32"
+                    "type": "string"
                 },
                 {
                     "internalType": "uint256",
@@ -519,25 +534,6 @@ export const constants = {
             "type": "function"
         },
         {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "name": "svgData",
-            "outputs": [
-                {
-                    "internalType": "string",
-                    "name": "",
-                    "type": "string"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
             "inputs": [],
             "name": "symbol",
             "outputs": [
@@ -548,13 +544,6 @@ export const constants = {
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "toggleSale",
-            "outputs": [],
-            "stateMutability": "nonpayable",
             "type": "function"
         },
         {
@@ -671,50 +660,31 @@ export const constants = {
         {
             "inputs": [
                 {
+                    "internalType": "uint256",
+                    "name": "value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "uintToString",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "pure",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
                     "internalType": "string",
                     "name": "_baseUrl",
                     "type": "string"
                 }
             ],
             "name": "updateBaseUrl",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "_address",
-                    "type": "address"
-                }
-            ],
-            "name": "updateDevAddress",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "tokenId",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "string",
-                    "name": "_svgData",
-                    "type": "string"
-                }
-            ],
-            "name": "updateToken",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "withdrawAll",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
