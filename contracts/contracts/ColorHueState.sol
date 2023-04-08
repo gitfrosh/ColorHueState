@@ -137,7 +137,8 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         string memory rings = generateRings(colors);
         string memory ringAttributes = generateRingAttributes(attributes);
         string memory svg = generateSVG(colors);
-        return packJSONString(svg, blockNumber, rings, ringAttributes);
+        string memory svgBase64 = Base64.encode(abi.encodePacked(svg));
+        return packJSONString(svgBase64, blockNumber, rings, ringAttributes);
     }
 
     function generateRingAttributes(
