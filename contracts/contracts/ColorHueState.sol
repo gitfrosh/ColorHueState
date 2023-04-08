@@ -40,20 +40,14 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     // Base `external_url` in attributes
     string public baseUrl;
 
-    // Toggle to permanently disable metadata updates
-    bool public metadataFrozen;
-
     // Sale status. Toggle to enable minting.
     bool public saleActive = false;
 
     // Internal tokenId tracker
     uint256 private _currentId;
 
-    event ColorHueStateCreated(uint256 indexed tokenId);
-    event TokenUpdated(uint256 tokenId);
-
     constructor() ERC721("ColorHueState", "CHS") {
-        baseUrl = "http://www.colorhuestate.xyz/?tokenid=";
+        baseUrl = "http://www.colorhuestate.xyz/?blockNumber=";
     }
 
     function contractURI() external pure returns (string memory) {
@@ -72,11 +66,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
                     Base64.encode(bytes(json))
                 )
             );
-    }
-
-
-    function permanentlyFreezeMetadata() external onlyOwner {
-        metadataFrozen = true;
     }
 
     function withdrawAll() external {
@@ -102,8 +91,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
 
         _mint(msg.sender, newItemId);
         _tokenURIs[newItemId] = _constructTokenURI(newItemId, blockNumber);
-
-        emit ColorHueStateCreated(newItemId++);
     }
 
     function _constructTokenURI(
@@ -129,13 +116,15 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         bytes memory svgBytes = abi.encodePacked(svg);
         string memory svgBase64 = Base64.encode(svgBytes);
         string memory ringAttributes = generateRingAttributes(attributes);
+        string memory rings = generateRings(colors);
 
 
 
         string memory json = packJSONString(
             svgBase64,
             blockNumber,
-            ringAttributes
+            ringAttributes,
+            rings
         );
         string memory finalUri = string(
             abi.encodePacked("data:application/json;base64,", json)
@@ -182,6 +171,33 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             );
     }
 
+        function generateRings(
+        string[8] memory colors
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    "Ring A: ",
+                    colors[0],
+                    "-",
+                    colors[1],
+                    " Ring B: ",
+                    colors[2],
+                    "-",
+                    colors[3],
+                    " Ring C: ",
+                    colors[4],
+                    "-",
+                    colors[5],
+                    " Ring D: ",
+                    colors[6],
+                    "-",
+                    colors[7]
+                )
+            );
+    }
+
+
 
     function burn(uint256 tokenId) external onlyOwner {
         _burn(tokenId);
@@ -197,18 +213,18 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     function packJSONString(
         string memory encodedSVG,
         uint256 blockNumber,
-        string memory ringAttributes
+        string memory ringAttributes,
+                string memory rings
     ) public view returns (string memory) {
-        string memory style = "hey";
-        console.log(ringAttributes);
+        console.log(rings);
         string memory name = string(
-            abi.encodePacked("ColorHueState Block #", blockNumber.toString())
+            abi.encodePacked("ColorHueState Block No. ", blockNumber.toString())
         );
         string memory description = string(
             abi.encodePacked(
-                "ColorHueState Block #",
+                "ColorHueState Block No. ",
                 blockNumber.toString(),
-                ". ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology."            )
+                " ", rings)
         );
         return
             Base64.encode(

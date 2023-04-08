@@ -4,30 +4,21 @@ export function render_circles(hash) {
     console.log({ hash })
     if (!hash) return;
     var etherium_colors = new Array(8);
+    const hashMinus0x = hash.slice(2);
     for (var i = 0; i < etherium_colors.length; i++) {
 
-        etherium_colors[i] = "#" + hash.substring(i * 6, i * 6 + 6);
-        // console.log(etherium_colors[i])
+        etherium_colors[i] = "#" + hashMinus0x.substring(i * 6, i * 6 + 6);
+        console.log(etherium_colors[i])
     }
 
     var w = 800;
     var h = 800;
 
-    // var diameters = [0.0, 0.25, 0.5, 0.75, 0.98];
 
     var html = `<svg width="800" height="800" >`;
-    // for (var i = 0; i < diameters.length - 1; i++) {
-    //     var start = etherium_colors[i * 2];
-    //     var end = etherium_colors[i * 2 + 1];
-    //     console.log(start, end)
-
-    // }
-    // var D = Math.floor(Math.min(w, h));
     var D = 300;
     var rs = [200, 155, 110, 61];
     var ps = [75, 75, 75, 0];
-    // console.log({ D })
-    // console.log({ w, h })
     for (var i = 0; i < 5 - 1; i++) {
         var start = etherium_colors[i * 2];
         var end = etherium_colors[i * 2 + 1];
@@ -61,10 +52,6 @@ export function render_circles(hash) {
             i +
             ')" />\n';
     }
-    html += "</svg>\n";
-    // console.log(html);
 
     return html;
-    // canvas.innerHTML = html;
-    // $("#info_div").css("visibility", "hidden");
 }

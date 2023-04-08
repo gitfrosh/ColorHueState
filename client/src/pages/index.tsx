@@ -1,21 +1,20 @@
 import Head from "next/head";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { watchBlockNumber } from "@wagmi/core";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ethers, Signer } from "ethers";
 import { constants } from "../constants";
 import { useAccount, useProvider, useSigner } from "wagmi";
 import Link from "next/link";
 import { render_circles } from "../utils";
-import SVG from "react-inlinesvg";
 import { useWindowSize } from "../hooks";
 import { Gallery } from "@/components/Gallery";
+
 export default function Home() {
   const { address } = useAccount();
   const [blockData, setBlockData] = useState<any>();
   const [caughtBlock, catchBlock] = useState<any>();
   const provider = useProvider();
-  // const blockDataHash = useMemo(() => blockData?.hash?.slice(2), [blockData]);
   const { data: signer } = useSigner();
   const [isMinted, setMinted] = useState<boolean | string | undefined>(false);
   const [svg, setSVG] = useState<string>();
@@ -25,10 +24,6 @@ export default function Home() {
     constants.NFT_ABI
   );
   const size = useWindowSize();
-  // const caughtBlockSvg = useMemo(
-  //   () => render_circles(caughtBlock?.hash),
-  //   [caughtBlock]
-  // );
   console.log({ caughtBlock });
   useEffect(() => {
     const svg = render_circles(blockData?.hash);
@@ -77,7 +72,7 @@ export default function Home() {
       }
     );
   }, []);
-  console.log(size);
+  console.log(blockData?.hash);
   return (
     <>
       <Head>
