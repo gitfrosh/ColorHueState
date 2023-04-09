@@ -38,7 +38,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     uint256 private _currentId;
 
     constructor() ERC721("ColorHueState", "CHS") {
-        baseUrl = "http://www.colorhuestate.xyz/?blockNumber=";
     }
 
     function contractURI() external pure returns (string memory) {

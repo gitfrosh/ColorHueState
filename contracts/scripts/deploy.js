@@ -1,3 +1,4 @@
+
 const main = async () => {
   const nftContractFactory = await hre.ethers.getContractFactory('ColorHueState');
   const nftContract = await nftContractFactory.deploy();

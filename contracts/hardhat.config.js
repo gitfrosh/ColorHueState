@@ -1,15 +1,17 @@
 require("@nomiclabs/hardhat-ethers");
 require("hardhat-gas-reporter");
+require("@nomiclabs/hardhat-etherscan");
+
 const dotenv = require("dotenv");
 dotenv.config();
 
 module.exports = {
   solidity: {
-    version: "0.8.6",
+    version: "0.8.9",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1000,
+        runs: 200,
       },
     },
   },
@@ -19,9 +21,9 @@ module.exports = {
       accounts: [process.env.PRIVATE_KEY],
     },
   },
-  // etherscan: {
-  //   // Your API key for Etherscan
-  //   // Obtain one at https://etherscan.io/
-  //   apiKey: process.env.ETHERSCAN_API_KEY,
-  // }
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: process.env.ETHERSCAN_API_KEY,
+  }
 }
