@@ -1,20 +1,34 @@
-/**
-
-     *** ***     
-  *          *   
- *            *  
-*              * 
- *            *  
-  *          *   
-     *** ***   
+/**                  
+              ....... ....  .......              
+           ....                    ....           
+        ....      ..............      ....        
+       :.     .....            .....     .:       
+     .:     .:.       ......       .:.     :.     
+    .:    .:.     ...        ...     .:.    :.    
+   .:    .:     :..            ..:     :.    :.   
+   .    .:    .:     ........     :.    :.    .   
+  .:    :.    :     :        :     :    .:    :.  
+  :.    .    ..    :          :    ..    .    .:  
+  :.    .    ..    :          :    ..    .    .:  
+  .:    :     :    .:        :.    :    .:    :.  
+   .    .:    .:     ........     :.    :.    .   
+   .:    .:     :.              .:     :.    :.   
+    .:    .:.     .....    .....     .:.    :.    
+     .:     .:.      ........      .:.     :.     
+       :.     .....            .....     .:       
+        .:.      ................      .:.        
+           ....                    ....           
+              .......        .......              
+                   ............  
 
 ColorHueState, 2023
 Jurgen Ostarhild
 https://www.colorhuestate.xyz
 
 "ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology." - 2023
+
+SPDX-License-Identifier: CC-BY-NC-4.0
 */
-// SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.6;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -37,18 +51,11 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     // Internal tokenId tracker
     uint256 private _currentId;
 
-    constructor() ERC721("ColorHueState", "CHS") {
-    }
+    constructor() ERC721("ColorHueState", "CHS") {}
 
     function contractURI() external pure returns (string memory) {
-        string memory json = string(
-            abi.encodePacked(
-                "{",
-                '"name": "ColorHueState",',
-                '"description": "ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology.",',
-                "}"
-            )
-        );
+        string
+            memory json = '{"name": "ColorHueState","description": "ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology."}';
         return
             string(
                 abi.encodePacked(
@@ -61,7 +68,6 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     function updateBaseUrl(string calldata _baseUrl) external onlyOwner {
         baseUrl = _baseUrl;
     }
-
 
     function mint(uint256 blockNumber) external {
         require(
@@ -98,38 +104,38 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     ) internal view returns (string memory) {
         string memory svgBase64 = Base64.encode(abi.encodePacked(svg));
         string memory ringAttributes = string(
-                abi.encodePacked(
-                    '", "attributes":[',
-                    generateAttributePair("A", attributes[0], attributes[1]),
-                    ",",
-                    generateAttributePair("B", attributes[2], attributes[3]),
-                    ",",
-                    generateAttributePair("C", attributes[4], attributes[5]),
-                    ",",
-                    generateAttributePair("D", attributes[6], attributes[7]),
-                    "]"
-                )
-            );
+            abi.encodePacked(
+                '", "attributes":[',
+                generateAttributePair("Ring A", attributes[0], attributes[1]),
+                ",",
+                generateAttributePair("Ring B", attributes[2], attributes[3]),
+                ",",
+                generateAttributePair("Ring C", attributes[4], attributes[5]),
+                ",",
+                generateAttributePair("Ring D", attributes[6], attributes[7]),
+                "]"
+            )
+        );
         string memory rings = string(
-                abi.encodePacked(
-                    "Ring A: ",
-                    colors[0],
-                    "-",
-                    colors[1],
-                    " Ring B: ",
-                    colors[2],
-                    "-",
-                    colors[3],
-                    " Ring C: ",
-                    colors[4],
-                    "-",
-                    colors[5],
-                    " Ring D: ",
-                    colors[6],
-                    "-",
-                    colors[7]
-                )
-            );
+            abi.encodePacked(
+                "Ring A: ",
+                colors[0],
+                "-",
+                colors[1],
+                " Ring B: ",
+                colors[2],
+                "-",
+                colors[3],
+                " Ring C: ",
+                colors[4],
+                "-",
+                colors[5],
+                " Ring D: ",
+                colors[6],
+                "-",
+                colors[7]
+            )
+        );
 
         string memory name = string(
             abi.encodePacked(
@@ -308,11 +314,11 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             uint256 end = start + 6;
             string memory color = substring(blockHashString, start, end);
             if (isAlpha(color)) {
-                attributes[i] = "nondigit";
+                attributes[i] = "letter";
             } else if (isNumeric(color)) {
                 attributes[i] = "digit";
             } else {
-                attributes[i] = "mixed";
+                attributes[i] = "mix";
             }
             ethereumColors[i] = string(abi.encodePacked("#", color));
         }
@@ -385,6 +391,4 @@ contract ColorHueState is Ownable, ERC721Enumerable {
         }
         return string(buffer);
     }
-
 }
-

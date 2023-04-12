@@ -1,8 +1,9 @@
-# Sample Hardhat Project
+# ColorHueState | Contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This project includes the smart contract (ColorHueState.sol) for the
+ColorHueState digital art project by Jurgen Ostarhild and accompanying contracts. It comes also with a test for that contract, and a script that deploys that contract.
 
-Try running some of the following tasks:
+To redeploy try running some of the following tasks:
 
 ```shell
 npx hardhat help
