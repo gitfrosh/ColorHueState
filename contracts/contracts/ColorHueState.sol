@@ -51,8 +51,9 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     // Internal tokenId tracker
     uint256 private _currentId;
 
-    constructor() ERC721("ColorHueState", "CHS") {}
-
+    constructor() ERC721("ColorHueState", "CHS") {
+        baseUrl = "http://www.colorhuestate.xyz/?blockNumber=";
+    }
     function contractURI() external pure returns (string memory) {
         string
             memory json = '{"name": "ColorHueState","description": "ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology."}';
