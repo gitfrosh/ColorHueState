@@ -313,6 +313,3 @@ export default function Home() {
     </>
   );
 }
-function useWindowSize(): { width: any } {
-  throw new Error("Function not implemented.");
-}

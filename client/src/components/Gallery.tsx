@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useAccount, useProvider, useSigner } from "wagmi";
 import { Alchemy, Network } from "alchemy-sdk";
 import { constants } from "../constants";
 import { useWindowSize } from "../hooks";
-import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import Head from "next/head";
 
 const config = {
   apiKey: process.env.ALCHEMY_ID,
@@ -41,17 +38,16 @@ export function Gallery() {
     dots: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 6,
+    slidesToShow: nfts?.length < 6 ? nfts?.length : 6,
     slidesToScroll: 2,
     initialSlide: 0,
     responsive: [
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 3,
+          slidesToShow: nfts?.length < 3 ? nfts?.length : 3,
           slidesToScroll: 2,
           initialSlide: 0,
-
           infinite: true,
           dots: true,
         },
@@ -59,7 +55,7 @@ export function Gallery() {
       {
         breakpoint: 600,
         settings: {
-          slidesToShow: 2,
+          slidesToShow: nfts?.length < 2 ? nfts?.length : 2,
           slidesToScroll: 2,
           initialSlide: 0,
         },
@@ -77,14 +73,5 @@ export function Gallery() {
         </div>
       ))}
     </Slider>
-    // <div className={`grid grid-cols-${width < 481 ? "2" : "6"} gap-4`}>
-    //   {nfts?.map((nft: any, i: number) => (
-    //     <div key={i} className="relative bg-black">
-    //       <a href="">
-    //         <img src={nft.media[0]?.thumbnail} />
-    //       </a>
-    //     </div>
-    //   ))}
-    // </div>
   );
 }
