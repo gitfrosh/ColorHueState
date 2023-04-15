@@ -21,11 +21,12 @@
               .......        .......              
                    ............  
 
+
 ColorHueState, 2023
 Jurgen Ostarhild
 https://www.colorhuestate.xyz
 
-"ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology." - 2023
+"ColorHueState is an open-ended on-chain SVG-engraving of the heartbeat of the Ethereum blockchain." - 2023
 
 SPDX-License-Identifier: CC-BY-NC-4.0
 */
@@ -56,7 +57,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     }
     function contractURI() external pure returns (string memory) {
         string
-            memory json = '{"name": "ColorHueState","description": "ColorHueState is a captivating digital art project that generates ever-changing chromatic circles from the latest Ethereum block hash, creating a mesmerizing visual symphony embodying the beauty of blockchain technology."}';
+            memory json = '{"name": "ColorHueState","description": "ColorHueState is an open-ended on-chain SVG-engraving of the heartbeat of the Ethereum blockchain."}';
         return
             string(
                 abi.encodePacked(

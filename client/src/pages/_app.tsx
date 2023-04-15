@@ -6,12 +6,14 @@ import {
   RainbowKitProvider,
   midnightTheme,
 } from "@rainbow-me/rainbowkit";
-import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { Chain, configureChains, createClient, WagmiConfig } from "wagmi";
 import { mainnet, goerli, hardhat } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 
+const networks = process.env.NODE_ENV === "development" ? [goerli] : [mainnet];
+
 const { chains, provider, webSocketProvider } = configureChains(
-  [mainnet, goerli, hardhat],
+  networks as Chain[],
   [
     // alchemyProvider({ apiKey: process.env.ALCHEMY_ID || "" }),
     publicProvider(),

@@ -28,6 +28,10 @@ export default function Home() {
     setSVG(svg);
   }, [blockData]);
 
+  useEffect(() => {
+    console.log(process.env.NODE_ENV);
+  }, []);
+
   const getBlockData = async (blockNumber: number) => {
     try {
       const data = await provider.getBlock(blockNumber);
@@ -58,7 +62,7 @@ export default function Home() {
   useEffect(() => {
     watchBlockNumber(
       {
-        chainId: 5,
+        chainId: process.env.NODE_ENV === "development" ? 5 : 1,
         listen: true,
       },
       (blockNumber) => {
@@ -77,9 +81,16 @@ export default function Home() {
 
       <div className="flex flex-col h-screen">
         <header className="h-16 p-10 bg-black flex items-center justify-between">
-          <Link className="ml-4" scroll={false} href="#about">
-            <span className="text-white">about</span>
-          </Link>
+          <a
+            target="_blank"
+            href={`${
+              process.env.NODE_ENV === "development"
+                ? "https://goerli.etherscan.io/block/"
+                : "https://etherscan.io/block/"
+            }${blockData?.number}`}
+          >
+            <span className="text-white mr-5">Block #{blockData?.number}</span>
+          </a>
           <span className="mr-4">
             <ConnectButton showBalance={false} chainStatus="none" />
           </span>
@@ -136,7 +147,11 @@ export default function Home() {
               {isMinted && !isMinting && (
                 <a
                   target={"_blank"}
-                  href={`https://goerli.etherscan.io/tx/${isMinted}`}
+                  href={`${
+                    process.env.NODE_ENV === "development"
+                      ? "https://goerli.etherscan.io/tx/"
+                      : "https://etherscan.io/tx/"
+                  }${isMinted}`}
                 >
                   .. View transaction
                 </a>
@@ -148,9 +163,9 @@ export default function Home() {
           <section className="mb-10 ml-16 mr-16 h-12 bg-black text-white">
             <div className="h-16 bg-black text-white flex items-center justify-between">
               <div className="">
-                <p>
-                  Block # <span>{blockData?.number}</span>
-                </p>
+                <Link className="ml-4" scroll={false} href="#about">
+                  <span className="text-white">about</span>
+                </Link>
                 {/* <p>
                   Hash #{" "}
                   <span>
@@ -193,7 +208,7 @@ export default function Home() {
                     }}
                     className="bg-transparent hover:bg-white text-white font-semibold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded"
                   >
-                    {!caughtBlock ? "Catch!" : "Catch new one!"}
+                    {!caughtBlock ? "Mint!" : "Mint new one!"}
                   </button>
                 )}
               </div>
@@ -201,68 +216,103 @@ export default function Home() {
           </section>
         )}
       </div>
-
-      <div className="flex flex-col min-h-screen">
-        <section
-          id="about"
-          className="p-12 bg-black grid grid-cols-1 md:grid-cols-2"
-        >
-          <div>
-            <h2 className="text-xl text-white font-bold mb-4">ColorHueState</h2>
-            <div className="text-white p-2">
-              ColorHueState is a cutting-edge digital art project that
-              seamlessly blends the worlds of blockchain technology and visual
-              aesthetics. Drawing inspiration from the dynamic and ever-evolving
-              nature of the Ethereum blockchain, this immersive experience
-              generates an exquisite symphony of chromatic circles, each
-              representing the unique hues of the most recent Ethereum block
-              hash. By tapping into the inherent randomness and unpredictability
-              of blockchain data, ColorHueState is able to create a vivid and
-              constantly changing visual tapestry. The result is a mesmerizing
-              exploration of color, form, and movement that challenges
-              traditional notions of digital artistry. <br /> <br /> Each circle
-              embodies the essence of a singular moment in the Ethereum network,
-              immortalizing it in a kaleidoscope of vibrant hues. As a testament
-              to the beauty of decentralized networks, ColorHueState transcends
-              the boundaries of conventional art, inviting viewers to ponder the
-              intricate connections between technology and creativity. This
-              compelling intersection of art and blockchain serves as a metaphor
-              for the boundless potential of human innovation and our collective
-              pursuit of harmony amidst chaos. ColorHueState is more than just
-              an artistic display; it is an invitation to journey through the
-              enigmatic world of blockchain, where every Ethereum block hash
-              births a new, ephemeral masterpiece. Immerse yourself in the
-              dynamic dance of colors, as ColorHueState captures the fluidity of
-              the digital realm and transforms it into a visual symphony for the
-              senses.
-            </div>
-          </div>
-          <div>
-            <div className="text-white p-2">
-              As a testament to the beauty of decentralized networks,
-              ColorHueState transcends the boundaries of conventional art,
-              inviting viewers to ponder the intricate connections between
-              technology and creativity. This compelling intersection of art and
-              blockchain serves as a metaphor for the boundless potential of
-              human innovation and our collective pursuit of harmony amidst
-              chaos. <br /> <br /> ColorHueState is more than just an artistic
-              display; it is an invitation to journey through the enigmatic
-              world of blockchain, where every Ethereum block hash births a new,
-              ephemeral masterpiece. Immerse yourself in the dynamic dance of
-              colors, as ColorHueState captures the fluidity of the digital
-              realm and transforms it into a visual symphony for the senses.
-            </div>
-          </div>
-        </section>
-      </div>
       <div>
         <section className="h-30">
           <Gallery />
         </section>
       </div>
+      <div className="flex flex-col">
+        <section
+          id="about"
+          className="p-12 bg-black grid grid-cols-1 md:grid-cols-2"
+        >
+          <div>
+            <div className="text-white p-2">
+              <p className="mb-3">
+                <em>
+                  There isn’t any light that is artificial. It may be light that
+                  we created, but you have to burn something to make light.
+                </em>{" "}
+                – James Turrell
+              </p>
+              <p className="mb-3">
+                <span className="underline"> Intro </span>
+                <br />
+                ColorHueState (CHS) is an open-ended on-chain SVG-engraving of
+                the heartbeat of the Ethereum blockchain. Each hash of the
+                current block height is materialized into a chromatic
+                composition of four concentric rings encompassing the RGB color
+                space. CHS is connected to the incessant cadences in
+                decentralized technologies – a continuous present of irrevocable
+                time pockets with the opportunity for anyone to catch the visual
+                glimpse of such unique moments. ColorHueState is a memento token
+                of a quarter of a minute of permanence.
+              </p>
+              <p className="mb-3">
+                <span className="underline">Minting</span>
+                <br />
+                Drawing from the average Ethereum block time of 15 seconds a new
+                CHS composition is generated four times per minute circa. Each
+                block hash is unique and can be captured as an NFT (ERC-721)
+                only once, by a single entity. Minting incurs no cost except
+                network fees. Heads up minters! permanence is ephemeral
+              </p>
+            </div>
+          </div>
+          <div>
+            <div className="text-white p-2">
+              <p className="mb-3">
+                <span className="underline"> Attributes</span>
+                <br />
+                The four rings of a CHS are composed of outer ring A, followed
+                by ring B, then ring C, ending with inner ring D. Each ring
+                starts and ends with a six-character Hex color code eventually
+                making up the first 48 characters of a block hash. The
+                hexadecimal RGB color space encompasses a total of 16,777,216
+                distinct alphanumeric color values of which 46,656 are
+                permutations of only letters and 1,000,000 of only numbers.
+              </p>
+              <p className="mb-3">
+                <span className="underline"> Artist</span>
+                <br />
+                Jurgen Ostarhild is a Berlin-based visual artist and
+                photographer who uses light and code as his canvas. He creates
+                image machines, installations, multiples and printed artifacts.
+              </p>
+              <p className="mb-3">
+                <span className="underline"> Smart contract</span>
+                <br />
+                <a
+                  href={`${
+                    process.env.NODE_ENV === "development"
+                      ? "https://goerli.etherscan.io/address/"
+                      : "https://etherscan.io/address/"
+                  }${constants.NFT_ADDRESS}`}
+                >
+                  {constants.NFT_ADDRESS}
+                </a>
+              </p>
+              <p className="mb-3">
+                <span className="underline">License</span>
+                <br />
+                CC BY-NC 4.0
+              </p>
+              <p className="mb-3">
+                <span className="underline">Credits</span>
+                <br />A heartfelt shout-out to Rike, Roman and Armin without
+                whom this project would not have been possible.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+
       <footer className="h-16 bg-gray-900 text-white flex items-center justify-center">
         © {new Date().getFullYear()} Jurgen Ostarhild
       </footer>
     </>
   );
+}
+function useWindowSize(): { width: any } {
+  throw new Error("Function not implemented.");
 }
