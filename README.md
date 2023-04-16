@@ -1,4 +1,4 @@
-# ColorHueState | Jurgen Osterhild 2023
+# ColorHueState | Jurgen Ostarhild 2023
 
 > There isn’t any light that is artificial. It may be light 
 > that we created, but you have to burn something to make light.
