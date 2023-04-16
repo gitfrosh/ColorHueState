@@ -3,13 +3,12 @@ import { Alchemy, Network } from "alchemy-sdk";
 import { constants } from "../constants";
 import { useWindowSize } from "../hooks";
 import Slider from "react-slick";
+import { get_stage } from "@/utils";
 
 const config = {
   apiKey: process.env.ALCHEMY_ID,
   network:
-    process.env.NODE_ENV === "development"
-      ? Network.ETH_GOERLI
-      : Network.ETH_MAINNET,
+    get_stage() === "production" ? Network.ETH_MAINNET : Network.ETH_GOERLI,
 };
 
 const alchemy = new Alchemy(config);

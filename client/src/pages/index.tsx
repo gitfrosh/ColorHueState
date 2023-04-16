@@ -6,7 +6,7 @@ import { ethers, Signer } from "ethers";
 import { constants } from "../constants";
 import { useAccount, useProvider, useSigner } from "wagmi";
 import Link from "next/link";
-import { render_circles } from "../utils";
+import { get_stage, render_circles } from "../utils";
 import { Gallery } from "@/components/Gallery";
 import { HiOutlineMail } from "react-icons/hi";
 import { AiFillGithub } from "react-icons/ai";
@@ -31,7 +31,7 @@ export default function Home() {
   }, [blockData]);
 
   useEffect(() => {
-    console.log(process.env.NODE_ENV);
+    console.log(get_stage());
   }, []);
 
   const getBlockData = async (blockNumber: number) => {
@@ -86,9 +86,9 @@ export default function Home() {
           <a
             target="_blank"
             href={`${
-              process.env.NODE_ENV === "development"
-                ? "https://goerli.etherscan.io/block/"
-                : "https://etherscan.io/block/"
+              get_stage() === "production"
+                ? "https://etherscan.io/block/"
+                : "https://goerli.etherscan.io/block/"
             }${blockData?.number}`}
           >
             <span className="text-white font-bold mr-5">
@@ -152,9 +152,9 @@ export default function Home() {
                 <a
                   target={"_blank"}
                   href={`${
-                    process.env.NODE_ENV === "development"
-                      ? "https://goerli.etherscan.io/tx/"
-                      : "https://etherscan.io/tx/"
+                    get_stage() === "development"
+                      ? "https://etherscan.io/tx/"
+                      : "https://goerli.etherscan.io/tx/"
                   }${isMinted}`}
                 >
                   .. View transaction

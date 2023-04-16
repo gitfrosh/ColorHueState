@@ -9,8 +9,9 @@ import {
 import { Chain, configureChains, createClient, WagmiConfig } from "wagmi";
 import { mainnet, goerli, hardhat } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
+import { get_stage } from "@/utils";
 
-const networks = process.env.NODE_ENV === "development" ? [goerli] : [mainnet];
+const networks = get_stage() === "production" ? [mainnet] : [goerli];
 
 const { chains, provider, webSocketProvider } = configureChains(
   networks as Chain[],
