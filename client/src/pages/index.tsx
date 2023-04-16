@@ -8,6 +8,8 @@ import { useAccount, useProvider, useSigner } from "wagmi";
 import Link from "next/link";
 import { render_circles } from "../utils";
 import { Gallery } from "@/components/Gallery";
+import { HiOutlineMail } from "react-icons/hi";
+import { AiFillGithub } from "react-icons/ai";
 
 export default function Home() {
   const { address } = useAccount();
@@ -297,7 +299,15 @@ export default function Home() {
               <p className="mb-3">
                 <span className="underline">License</span>
                 <br />
-                CC BY-NC 4.0
+                <span>
+                  <a
+                    target="_blank"
+                    href="https://github.com/gitfrosh/ColorHueState"
+                  >
+                    <AiFillGithub />
+                  </a>{" "}
+                  CC BY-NC 4.0
+                </span>
               </p>
               <p className="mb-3">
                 <span className="underline">Credits</span>
@@ -310,7 +320,10 @@ export default function Home() {
       </div>
 
       <footer className="h-16 bg-gray-900 text-white flex items-center justify-center">
-        © {new Date().getFullYear()} Jurgen Ostarhild
+        © {new Date().getFullYear()} Jurgen Ostarhild{" "}
+        <a className="ml-2" href="mailto:admin@colorhuestate.xyz">
+          <HiOutlineMail />
+        </a>
       </footer>
     </>
   );
