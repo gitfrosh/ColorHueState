@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: "MenloBold";
-  src: url("../fonts/Menlo-Bold.ttf");
+  font-family: "Inter";
+  src: url("../fonts/Inter.ttf");
 }
 body,
 * {
-  font-family: "MenloBold";
+  font-family: "Inter";
   scroll-behavior: smooth;
   /* background-color: black; */
 }

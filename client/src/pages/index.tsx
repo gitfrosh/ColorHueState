@@ -89,7 +89,9 @@ export default function Home() {
                 : "https://etherscan.io/block/"
             }${blockData?.number}`}
           >
-            <span className="text-white mr-5">Block #{blockData?.number}</span>
+            <span className="text-white font-bold mr-5">
+              Block #{blockData?.number}
+            </span>
           </a>
           <span className="mr-4">
             <ConnectButton showBalance={false} chainStatus="none" />

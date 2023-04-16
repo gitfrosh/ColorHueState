@@ -55,6 +55,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     constructor() ERC721("ColorHueState", "CHS") {
         baseUrl = "http://www.colorhuestate.xyz/?blockNumber=";
     }
+
     function contractURI() external pure returns (string memory) {
         string
             memory json = '{"name": "ColorHueState","description": "ColorHueState is an open-ended on-chain SVG-engraving of the heartbeat of the Ethereum blockchain."}';
@@ -213,6 +214,10 @@ contract ColorHueState is Ownable, ERC721Enumerable {
     ) public view override(ERC721) returns (string memory) {
         require(_exists(tokenId), "ERC721: URI query for nonexistent token");
         return _tokenURIs[tokenId];
+    }
+
+    function changeOwner(address newOwner) external onlyOwner {
+        transferOwnership(newOwner);
     }
 
     function generateSVG(

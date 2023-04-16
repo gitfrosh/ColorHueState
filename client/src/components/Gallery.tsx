@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Alchemy, Network } from "alchemy-sdk";
 import { constants } from "../constants";
 import { useWindowSize } from "../hooks";
-import "react-multi-carousel/lib/styles.css";
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 
 const config = {
   apiKey: process.env.ALCHEMY_ID,
