@@ -288,9 +288,9 @@ export default function Home() {
                 <br />
                 <a
                   href={`${
-                    process.env.NODE_ENV === "development"
-                      ? "https://goerli.etherscan.io/address/"
-                      : "https://etherscan.io/address/"
+                    get_stage() === "production"
+                      ? "https://etherscan.io/address/"
+                      : "https://goerli.etherscan.io/address/"
                   }${constants.NFT_ADDRESS}`}
                 >
                   {constants.NFT_ADDRESS}
