@@ -26,7 +26,7 @@ ColorHueState, 2023
 Jurgen Ostarhild
 https://www.colorhuestate.xyz
 
-"ColorHueState is an open-ended on-chain SVG-engraving of the heartbeat of the Ethereum blockchain." - 2023
+"ColorHueState (CHS) is an on-chain image machine rendering the heartbeat of the Ethereum blockchain." - 2023
 
 SPDX-License-Identifier: CC-BY-NC-4.0
 */
@@ -58,7 +58,7 @@ contract ColorHueState is Ownable, ERC721Enumerable {
 
     function contractURI() external pure returns (string memory) {
         string
-            memory json = '{"name": "ColorHueState","description": "ColorHueState is an open-ended on-chain SVG-engraving of the heartbeat of the Ethereum blockchain."}';
+            memory json = '{"name": "ColorHueState","description": "ColorHueState (CHS) is an on-chain image machine rendering the heartbeat of the Ethereum blockchain."}';
         return
             string(
                 abi.encodePacked(
@@ -321,11 +321,11 @@ contract ColorHueState is Ownable, ERC721Enumerable {
             uint256 end = start + 6;
             string memory color = substring(blockHashString, start, end);
             if (isAlpha(color)) {
-                attributes[i] = "letter";
+                attributes[i] = "Letters";
             } else if (isNumeric(color)) {
-                attributes[i] = "digit";
+                attributes[i] = "Numbers";
             } else {
-                attributes[i] = "mix";
+                attributes[i] = "Alphanumericals"; 
             }
             ethereumColors[i] = string(abi.encodePacked("#", color));
         }

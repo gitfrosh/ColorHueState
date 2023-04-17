@@ -29,6 +29,7 @@ export function Gallery() {
         omitMetadata: false,
       }
     );
+    console.log(nfts);
     setNfts(nfts.slice(0, 12));
   };
 
@@ -65,20 +66,20 @@ export function Gallery() {
     <Slider {...settings}>
       {nfts?.map((nft: any, i: number) => (
         <div key={i} className="relative bg-black">
-          <a href="">
+          <a
+            target="_blank"
+            href={`${
+              get_stage() === "production"
+                ? "https://opensea.io"
+                : "https://testnets.opensea.io"
+            }/de-DE/assets/${
+              get_stage() === "production" ? "ethereum" : "goerli"
+            }/${constants.NFT_ADDRESS}/${nft?.tokenId}`}
+          >
             <img src={nft.media[0]?.thumbnail} />
           </a>
         </div>
       ))}
     </Slider>
-    // <div className={`grid grid-cols-${width < 481 ? "2" : "6"} gap-4`}>
-    //   {nfts?.map((nft: any, i: number) => (
-    //     <div key={i} className="relative bg-black">
-    //       <a href="">
-    //         <img src={nft.media[0]?.thumbnail} />
-    //       </a>
-    //     </div>
-    //   ))}
-    // </div>
   );
 }

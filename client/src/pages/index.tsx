@@ -83,18 +83,10 @@ export default function Home() {
 
       <div className="flex flex-col h-screen">
         <header className="h-16 p-10 bg-black flex items-center justify-between">
-          <a
-            target="_blank"
-            href={`${
-              get_stage() === "production"
-                ? "https://etherscan.io/block/"
-                : "https://goerli.etherscan.io/block/"
-            }${blockData?.number}`}
-          >
-            <span className="text-white font-bold mr-5">
-              Block #{blockData?.number}
-            </span>
-          </a>
+          <Link className="ml-4" scroll={false} href="#about">
+            <span className="text-white font-bold">About</span>
+          </Link>
+
           <span className="mr-4">
             <ConnectButton showBalance={false} chainStatus="none" />
           </span>
@@ -111,7 +103,7 @@ export default function Home() {
         </section>
         {!!caughtBlock && (
           <div
-            className="absolute p-6 top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+            className="absolute p-6 bottom-[0px] -right-[67px] transform -translate-x-1/2 -translate-y-1/2
           h-300 bg-black text-white border border-white rounded"
           >
             <button
@@ -149,16 +141,20 @@ export default function Home() {
                 </button>
               )}
               {isMinted && !isMinting && (
-                <a
-                  target={"_blank"}
-                  href={`${
-                    get_stage() === "development"
-                      ? "https://etherscan.io/tx/"
-                      : "https://goerli.etherscan.io/tx/"
-                  }${isMinted}`}
-                >
-                  .. View transaction
-                </a>
+                <span>
+                  Congratulations!
+                  <br />
+                  <a
+                    target={"_blank"}
+                    href={`${
+                      get_stage() === "development"
+                        ? "https://etherscan.io/tx/"
+                        : "https://goerli.etherscan.io/tx/"
+                    }${isMinted}`}
+                  >
+                    .. view transaction
+                  </a>
+                </span>
               )}
             </div>
           </div>
@@ -167,9 +163,18 @@ export default function Home() {
           <section className="mb-10 ml-16 mr-16 h-12 bg-black text-white">
             <div className="h-16 bg-black text-white flex items-center justify-between">
               <div className="">
-                <Link className="ml-4" scroll={false} href="#about">
-                  <span className="text-white">about</span>
-                </Link>
+                <a
+                  target="_blank"
+                  href={`${
+                    get_stage() === "production"
+                      ? "https://etherscan.io/block/"
+                      : "https://goerli.etherscan.io/block/"
+                  }${blockData?.number}`}
+                >
+                  <span className="text-white font-bold mr-5">
+                    Block #{blockData?.number}
+                  </span>
+                </a>
                 {/* <p>
                   Hash #{" "}
                   <span>
@@ -210,7 +215,7 @@ export default function Home() {
                         svg: svgCopy,
                       });
                     }}
-                    className="bg-transparent hover:bg-white text-white font-semibold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded"
+                    className="bg-transparent hover:bg-white text-white font-bold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded"
                   >
                     {!caughtBlock ? "Mint!" : "Mint new one!"}
                   </button>
@@ -233,14 +238,7 @@ export default function Home() {
           <div>
             <div className="text-white p-2">
               <p className="mb-3">
-                <em>
-                  There isn’t any light that is artificial. It may be light that
-                  we created, but you have to burn something to make light.
-                </em>{" "}
-                – James Turrell
-              </p>
-              <p className="mb-3">
-                <span className="underline"> Intro </span>
+                <span className="font-bold"> Intro </span>
                 <br />
                 ColorHueState (CHS) is an open-ended on-chain SVG-engraving of
                 the heartbeat of the Ethereum blockchain. Each hash of the
@@ -253,7 +251,7 @@ export default function Home() {
                 of a quarter of a minute of permanence.
               </p>
               <p className="mb-3">
-                <span className="underline">Minting</span>
+                <span className="font-bold">Minting</span>
                 <br />
                 Drawing from the average Ethereum block time of 15 seconds a new
                 CHS composition is generated four times per minute circa. Each
@@ -261,12 +259,8 @@ export default function Home() {
                 only once, by a single entity. Minting incurs no cost except
                 network fees. Heads up minters! permanence is ephemeral
               </p>
-            </div>
-          </div>
-          <div>
-            <div className="text-white p-2">
               <p className="mb-3">
-                <span className="underline"> Attributes</span>
+                <span className="font-bold"> Attributes</span>
                 <br />
                 The four rings of a CHS are composed of outer ring A, followed
                 by ring B, then ring C, ending with inner ring D. Each ring
@@ -276,15 +270,19 @@ export default function Home() {
                 distinct alphanumeric color values of which 46,656 are
                 permutations of only letters and 1,000,000 of only numbers.
               </p>
+            </div>
+          </div>
+          <div>
+            <div className="text-white p-2">
               <p className="mb-3">
-                <span className="underline"> Artist</span>
+                <span className="font-bold"> Artist</span>
                 <br />
                 Jurgen Ostarhild is a Berlin-based visual artist and
                 photographer who uses light and code as his canvas. He creates
                 image machines, installations, multiples and printed artifacts.
               </p>
               <p className="mb-3">
-                <span className="underline"> Smart contract</span>
+                <span className="font-bold"> Smart contract</span>
                 <br />
                 <a
                   href={`${
@@ -297,7 +295,7 @@ export default function Home() {
                 </a>
               </p>
               <p className="mb-3">
-                <span className="underline">License</span>
+                <span className="font-bold">License</span>
                 <br />
                 <span>
                   <a
@@ -310,9 +308,13 @@ export default function Home() {
                 </span>
               </p>
               <p className="mb-3">
-                <span className="underline">Credits</span>
-                <br />A heartfelt shout-out to Rike, Roman and Armin without
-                whom this project would not have been possible.
+                <span className="font-bold">Credits</span>
+                <br />A heartfelt shout-out to{" "}
+                <a target="_blank" href="https://rike.dev">
+                  Rike
+                </a>
+                , Roman and Armin without whom this project would not have been
+                possible.
               </p>
             </div>
           </div>
@@ -320,7 +322,10 @@ export default function Home() {
       </div>
 
       <footer className="h-16 bg-gray-900 text-white flex items-center justify-center">
-        © {new Date().getFullYear()} Jurgen Ostarhild{" "}
+        © {new Date().getFullYear()}{" "}
+        <a target="_blank" href="https://www.jurgenostarhild.eu/">
+          Jurgen Ostarhild
+        </a>{" "}
         <a className="ml-2" href="mailto:admin@colorhuestate.xyz">
           <HiOutlineMail />
         </a>
