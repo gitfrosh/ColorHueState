@@ -18,10 +18,10 @@ export function render_circles(hash: string) {
     etherium_colors[i] = "#" + hashMinus0x.substring(i * 6, i * 6 + 6);
   }
 
-  var w = 800;
-  var h = 800;
+  var w = 400;
+  var h = 400;
 
-  var html = `<svg class="svg-content" width="800" height="800" viewBox="0 0 800 800" >`;
+  var html = `<svg class="svg-content" width="400" height="400" viewBox="0 0 400 400" >`;
   var D = 300;
   var rs = [200, 155, 110, 61];
   var ps = [75, 75, 75, 0];
