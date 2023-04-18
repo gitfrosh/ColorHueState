@@ -49,7 +49,9 @@ export default function Home() {
     try {
       const tx = await contract
         .connect(signer as Signer)
-        .mint(caughtBlock?.number);
+        .mint(caughtBlock?.number, {
+          gasLimit: 3000000,
+        });
       const result = await tx.wait();
       if (result?.transactionHash) {
         setMinted(result?.transactionHash);
@@ -103,7 +105,7 @@ export default function Home() {
         </section>
         {!!caughtBlock && (
           <div
-            className="absolute p-6 bottom-[0px] -right-[67px] transform -translate-x-1/2 -translate-y-1/2
+            className="absolute p-6 w-[250px] bottom-[0px] -right-[62px] transform -translate-x-1/2 -translate-y-1/2
           h-300 bg-black text-white border border-white rounded"
           >
             <button
