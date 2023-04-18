@@ -242,15 +242,15 @@ export default function Home() {
               <p className="mb-3">
                 <span className="font-bold"> Intro </span>
                 <br />
-                ColorHueState (CHS) is an open-ended on-chain SVG-engraving of
-                the heartbeat of the Ethereum blockchain. Each hash of the
-                current block height is materialized into a chromatic
-                composition of four concentric rings encompassing the RGB color
-                space. CHS is connected to the incessant cadences in
-                decentralized technologies – a continuous present of irrevocable
-                time pockets with the opportunity for anyone to catch the visual
-                glimpse of such unique moments. ColorHueState is a memento token
-                of a quarter of a minute of permanence.
+                ColorHueState (CHS) is an on-chain image machine rendering the
+                heartbeat of the Ethereum blockchain. Each hash of the current
+                block height is materialized into a chromatic composition of
+                four concentric rings encompassing the RGB color space. CHS is
+                connected to the incessant cadences in decentralized
+                technologies – a continuous present of irrevocable time pockets
+                with the opportunity for anyone to catch the visual glimpse of
+                such unique moments. ColorHueState is a memento token of a
+                quarter of a minute of permanence.
               </p>
               <p className="mb-3">
                 <span className="font-bold">Minting</span>
