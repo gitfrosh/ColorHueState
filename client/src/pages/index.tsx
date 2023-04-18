@@ -330,7 +330,11 @@ export default function Home() {
 
       <footer className="h-16 bg-gray-900 text-white flex items-center justify-center">
         © {new Date().getFullYear()}{" "}
-        <a target="_blank" href="https://www.jurgenostarhild.eu/">
+        <a
+          className="ml-1"
+          target="_blank"
+          href="https://www.jurgenostarhild.eu/"
+        >
           Jurgen Ostarhild
         </a>
       </footer>
