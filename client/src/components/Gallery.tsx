@@ -8,7 +8,10 @@ import "slick-carousel/slick/slick-theme.css";
 import { get_stage } from "@/utils";
 
 const config = {
-  apiKey: process.env.ALCHEMY_ID,
+  apiKey:
+    get_stage() === "production"
+      ? process.env.ALCHEMY_ID_MAINNET
+      : process.env.ALCHEMY_ID,
   network:
     get_stage() === "production" ? Network.ETH_MAINNET : Network.ETH_GOERLI,
 };
@@ -29,7 +32,6 @@ export function Gallery() {
         omitMetadata: false,
       }
     );
-    console.log(nfts);
     setNfts(nfts.slice(0, 12));
   };
 
@@ -41,16 +43,6 @@ export function Gallery() {
     slidesToScroll: 2,
     initialSlide: 0,
     responsive: [
-      // {
-      //   breakpoint: 1024,
-      //   settings: {
-      //     slidesToShow: 3,
-      //     slidesToScroll: 2,
-      //     initialSlide: 0,
-      //     infinite: true,
-      //     dots: true,
-      //   },
-      // },
       {
         breakpoint: 600,
         settings: {
@@ -61,7 +53,6 @@ export function Gallery() {
       },
     ],
   };
-  console.log(nfts);
   return (
     <Slider {...settings}>
       {nfts?.map((nft: any, i: number) => (

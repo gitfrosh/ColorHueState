@@ -21,7 +21,7 @@ export function render_circles(hash: string) {
   var w = 400;
   var h = 400;
 
-  var html = `<svg class="svg-content" width="400" height="400" viewBox="0 0 400 400" >`;
+  var html = `<svg id="${hash}" class="svg-content" width="400" height="400" viewBox="0 0 400 400" >`;
   var D = 300;
   var rs = [200, 155, 110, 61];
   var ps = [75, 75, 75, 0];
@@ -30,7 +30,7 @@ export function render_circles(hash: string) {
     var end = etherium_colors[i * 2 + 1];
     html += "<defs>\n";
     html +=
-      '<radialGradient id="grad' +
+      `<radialGradient id="grad${hash}` +
       i +
       '" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">\n';
     html +=
@@ -52,7 +52,7 @@ export function render_circles(hash: string) {
       (D * rs[i]) / 200 / 1.5 +
       '" ry="' +
       (D * rs[i]) / 200 / 1.5 +
-      '" fill="url(#grad' +
+      `" fill="url(#grad${hash}` +
       i +
       ')" />\n';
   }

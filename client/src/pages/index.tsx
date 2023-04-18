@@ -8,16 +8,14 @@ import { useAccount, useProvider, useSigner } from "wagmi";
 import Link from "next/link";
 import { get_stage, render_circles } from "../utils";
 import { Gallery } from "@/components/Gallery";
-import { HiOutlineMail } from "react-icons/hi";
 import { AiFillGithub } from "react-icons/ai";
-
 export default function Home() {
   const { address } = useAccount();
   const [blockData, setBlockData] = useState<any>();
   const [caughtBlock, catchBlock] = useState<any>();
   const provider = useProvider();
   const { data: signer } = useSigner();
-  const [isMinted, setMinted] = useState<boolean | string | undefined>(false);
+  const [isMinted, setMinted] = useState<any>(false);
   const [svg, setSVG] = useState<string>();
   const [isMinting, toggleMinting] = useState(false);
   const contract = new ethers.Contract(
@@ -31,7 +29,7 @@ export default function Home() {
   }, [blockData]);
 
   useEffect(() => {
-    console.log(get_stage());
+    console.log("stage", get_stage());
   }, []);
 
   const getBlockData = async (blockNumber: number) => {
@@ -42,7 +40,6 @@ export default function Home() {
       console.log(error);
     }
   };
-
   const mint = async () => {
     toggleMinting(true);
 
@@ -54,7 +51,10 @@ export default function Home() {
         });
       const result = await tx.wait();
       if (result?.transactionHash) {
-        setMinted(result?.transactionHash);
+        setMinted({
+          txnhash: result?.transactionHash,
+          tokenId: result?.events[0]?.args?.tokenId,
+        });
       }
       toggleMinting(false);
     } catch (error) {
@@ -66,7 +66,7 @@ export default function Home() {
   useEffect(() => {
     watchBlockNumber(
       {
-        chainId: process.env.NODE_ENV === "development" ? 5 : 1,
+        chainId: get_stage() === "production" ? 1 : 5,
         listen: true,
       },
       (blockNumber) => {
@@ -125,7 +125,15 @@ export default function Home() {
             </button>
             <div className="relative">
               {`You chose Block #${caughtBlock?.number}`!}
-
+              <div
+                style={{
+                  marginTop: "10px",
+                  width: 100,
+                  height: 100,
+                  position: "relative",
+                }}
+                dangerouslySetInnerHTML={{ __html: caughtBlock?.svg || "" }}
+              />
               <br />
               {!isMinted && <p>Ready to mint? (only gas fees)</p>}
               <br />
@@ -149,12 +157,25 @@ export default function Home() {
                   <a
                     target={"_blank"}
                     href={`${
-                      get_stage() === "development"
+                      get_stage() === "production"
                         ? "https://etherscan.io/tx/"
                         : "https://goerli.etherscan.io/tx/"
-                    }${isMinted}`}
+                    }${isMinted?.txnhash}`}
                   >
                     .. view transaction
+                  </a>{" "}
+                  /{" "}
+                  <a
+                    target={"_blank"}
+                    href={`${
+                      get_stage() === "production"
+                        ? "https://opensea.io"
+                        : "https://testnets.opensea.io"
+                    }/de-DE/assets/${
+                      get_stage() === "production" ? "ethereum" : "goerli"
+                    }/${constants.NFT_ADDRESS}/${isMinted?.tokenId}`}
+                  >
+                    view on Opensea
                   </a>
                 </span>
               )}
@@ -211,10 +232,9 @@ export default function Home() {
                 {address && (
                   <button
                     onClick={() => {
-                      const svgCopy = `${svg}`;
                       catchBlock({
                         number: blockData?.number,
-                        svg: svgCopy,
+                        svg: render_circles(blockData?.hash),
                       });
                     }}
                     className="bg-transparent hover:bg-white text-white font-bold hover:text-black py-2 px-4 border border-white hover:border-transparent rounded"
