@@ -232,6 +232,7 @@ export default function Home() {
                 {address && (
                   <button
                     onClick={() => {
+                      setMinted(undefined);
                       catchBlock({
                         number: blockData?.number,
                         svg: render_circles(blockData?.hash),
