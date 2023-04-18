@@ -327,9 +327,6 @@ export default function Home() {
         © {new Date().getFullYear()}{" "}
         <a target="_blank" href="https://www.jurgenostarhild.eu/">
           Jurgen Ostarhild
-        </a>{" "}
-        <a className="ml-2" href="mailto:admin@colorhuestate.xyz">
-          <HiOutlineMail />
         </a>
       </footer>
     </>
