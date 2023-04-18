@@ -61,12 +61,13 @@ export function Gallery() {
       },
     ],
   };
-
+  console.log(nfts);
   return (
     <Slider {...settings}>
       {nfts?.map((nft: any, i: number) => (
         <div key={i} className="relative bg-black">
           <a
+            title={nft?.rawMetadata?.name}
             target="_blank"
             href={`${
               get_stage() === "production"
@@ -76,7 +77,7 @@ export function Gallery() {
               get_stage() === "production" ? "ethereum" : "goerli"
             }/${constants.NFT_ADDRESS}/${nft?.tokenId}`}
           >
-            <img src={nft.media[0]?.thumbnail} />
+            <img alt={nft?.rawMetadata?.name} src={nft.media[0]?.thumbnail} />
           </a>
         </div>
       ))}

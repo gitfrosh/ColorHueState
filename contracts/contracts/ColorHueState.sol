@@ -142,13 +142,13 @@ contract ColorHueState is Ownable, ERC721Enumerable {
 
         string memory name = string(
             abi.encodePacked(
-                "ColorHueState Block No. ",
+                "ColorHueState Block #",
                 uintToString(blockNumber)
             )
         );
         string memory description = string(
             abi.encodePacked(
-                "ColorHueState Block No. ",
+                "ColorHueState Block #",
                 uintToString(blockNumber),
                 " ",
                 rings
