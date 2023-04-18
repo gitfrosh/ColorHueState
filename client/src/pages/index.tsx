@@ -240,7 +240,7 @@ export default function Home() {
           <div>
             <div className="text-white p-2">
               <p className="mb-3">
-                <span className="font-bold"> Intro </span>
+                <span className="font-bold"> About </span>
                 <br />
                 ColorHueState (CHS) is an on-chain image machine rendering the
                 heartbeat of the Ethereum blockchain. Each hash of the current
