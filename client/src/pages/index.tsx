@@ -306,7 +306,12 @@ export default function Home() {
                   >
                     <AiFillGithub />
                   </a>{" "}
-                  CC BY-NC 4.0
+                  <a
+                    href="https://creativecommons.org/licenses/by-nc/4.0/"
+                    target="_blank"
+                  >
+                    CC BY-NC 4.0
+                  </a>
                 </span>
               </p>
               <p className="mb-3">
