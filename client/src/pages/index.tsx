@@ -280,7 +280,7 @@ export default function Home() {
                 CHS composition is generated four times per minute circa. Each
                 block hash is unique and can be captured as an NFT (ERC-721)
                 only once, by a single entity. Minting incurs no cost except
-                network fees. Heads up minters! permanence is ephemeral
+                network fees. Heads up minters, permanence is ephemeral!
               </p>
               <p className="mb-3">
                 <span className="font-bold"> Attributes</span>
@@ -302,7 +302,7 @@ export default function Home() {
                 <br />
                 Jurgen Ostarhild is a Berlin-based visual artist and
                 photographer who uses light and code as his canvas. He creates
-                image machines, installations, multiples and printed artifacts.
+                image automata, installations, multiples and printed artifacts.
               </p>
               <p className="mb-3">
                 <span className="font-bold"> Smart contract</span>
