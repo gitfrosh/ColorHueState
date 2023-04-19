@@ -195,7 +195,7 @@ export default function Home() {
                   }${blockData?.number}`}
                 >
                   <span className="text-white font-bold mr-5">
-                    Block #{blockData?.number}
+                    #{blockData?.number}
                   </span>
                 </a>
                 {/* <p>
