@@ -22,7 +22,11 @@ export default function Home() {
   const isCorrectChain =
     (get_stage() === "production" && activeChain?.id === 1) ||
     (get_stage() !== "production" && activeChain?.id === 5);
-
+  const etherscanUrl =
+    get_stage() === "production"
+      ? "https://etherscan.io"
+      : "https://goerli.etherscan.io";
+  console.log(etherscanUrl);
   const contract = new ethers.Contract(
     constants.NFT_ADDRESS,
     constants.NFT_ABI
@@ -194,11 +198,7 @@ export default function Home() {
               <div className="">
                 <a
                   target="_blank"
-                  href={`${
-                    get_stage() === "production"
-                      ? "https://etherscan.io/block/"
-                      : "https://goerli.etherscan.io/block/"
-                  }${blockData?.number}`}
+                  href={`${`${etherscanUrl}/block/`}${blockData?.number}`}
                 >
                   <span className="text-white font-bold mr-5">
                     #{blockData?.number}
@@ -314,11 +314,7 @@ export default function Home() {
                 <span className="font-bold"> Smart contract</span>
                 <br />
                 <a
-                  href={`${
-                    get_stage() === "production"
-                      ? "https://etherscan.io/address/"
-                      : "https://goerli.etherscan.io/address/"
-                  }${constants.NFT_ADDRESS}`}
+                  href={`${`${etherscanUrl}/address/${constants.NFT_ADDRESS}`}`}
                 >
                   {constants.NFT_ADDRESS}
                 </a>
