@@ -35,6 +35,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log("stage", get_stage());
+    console.log("isProduction", get_stage() === "production");
   }, []);
 
   const getBlockData = async (blockNumber: number) => {
