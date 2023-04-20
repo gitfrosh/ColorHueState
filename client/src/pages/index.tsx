@@ -19,11 +19,17 @@ export default function Home() {
   const [svg, setSVG] = useState<string>();
   const [isMinting, toggleMinting] = useState(false);
   const { chain: activeChain } = useNetwork();
+  const [stage, setStage] = useState<string>();
+
+  useEffect(() => {
+    setStage(get_stage());
+  }, [process]);
+
   const isCorrectChain =
-    (get_stage() === "production" && activeChain?.id === 1) ||
-    (get_stage() !== "production" && activeChain?.id === 5);
+    (stage === "production" && activeChain?.id === 1) ||
+    (stage !== "production" && activeChain?.id === 5);
   const etherscanUrl =
-    get_stage() === "production"
+    stage === "production"
       ? "https://etherscan.io"
       : "https://goerli.etherscan.io";
   console.log(etherscanUrl);
@@ -38,8 +44,8 @@ export default function Home() {
   }, [blockData]);
 
   useEffect(() => {
-    console.log("stage", get_stage());
-    console.log("isProduction", get_stage() === "production");
+    console.log("stage", stage);
+    console.log("isProduction", stage === "production");
   }, []);
 
   const getBlockData = async (blockNumber: number) => {
@@ -76,7 +82,7 @@ export default function Home() {
   useEffect(() => {
     watchBlockNumber(
       {
-        chainId: get_stage() === "production" ? 1 : 5,
+        chainId: stage === "production" ? 1 : 5,
         listen: true,
       },
       (blockNumber) => {
@@ -170,7 +176,7 @@ export default function Home() {
                   <a
                     target={"_blank"}
                     href={`${
-                      get_stage() === "production"
+                      stage === "production"
                         ? "https://etherscan.io/tx/"
                         : "https://goerli.etherscan.io/tx/"
                     }${isMinted?.txnhash}`}
@@ -181,11 +187,11 @@ export default function Home() {
                   <a
                     target={"_blank"}
                     href={`${
-                      get_stage() === "production"
+                      stage === "production"
                         ? "https://opensea.io"
                         : "https://testnets.opensea.io"
                     }/de-DE/assets/${
-                      get_stage() === "production" ? "ethereum" : "goerli"
+                      stage === "production" ? "ethereum" : "goerli"
                     }/${constants.NFT_ADDRESS}/${isMinted?.tokenId}`}
                   >
                     view on Opensea
