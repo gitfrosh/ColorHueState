@@ -4,7 +4,7 @@ import { watchBlockNumber } from "@wagmi/core";
 import { useEffect, useState } from "react";
 import { ethers, Signer } from "ethers";
 import { constants } from "../constants";
-import { useAccount, useProvider, useSigner } from "wagmi";
+import { useAccount, useProvider, useSigner, useNetwork } from "wagmi";
 import Link from "next/link";
 import { get_stage, render_circles } from "../utils";
 import { Gallery } from "@/components/Gallery";
@@ -18,6 +18,11 @@ export default function Home() {
   const [isMinted, setMinted] = useState<any>(false);
   const [svg, setSVG] = useState<string>();
   const [isMinting, toggleMinting] = useState(false);
+  const { chain: activeChain } = useNetwork();
+  const isCorrectChain =
+    (get_stage() === "production" && activeChain?.id === 1) ||
+    (get_stage() !== "production" && activeChain?.id === 5);
+
   const contract = new ethers.Contract(
     constants.NFT_ADDRESS,
     constants.NFT_ABI
@@ -229,7 +234,7 @@ export default function Home() {
                 </p> */}
               </div>
               <div className="">
-                {address && (
+                {address && isCorrectChain && (
                   <button
                     onClick={() => {
                       setMinted(undefined);
