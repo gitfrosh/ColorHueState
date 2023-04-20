@@ -90,7 +90,7 @@ export default function Home() {
           </Link>
 
           <span className="mr-4">
-            <ConnectButton showBalance={false} chainStatus="none" />
+            <ConnectButton showBalance={false} />
           </span>
         </header>
         <section className="flex-grow">
