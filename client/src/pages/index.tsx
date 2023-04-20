@@ -9,6 +9,7 @@ import Link from "next/link";
 import { get_stage, render_circles } from "../utils";
 import { Gallery } from "@/components/Gallery";
 import { AiFillGithub } from "react-icons/ai";
+
 export default function Home() {
   const { address } = useAccount();
   const [blockData, setBlockData] = useState<any>();
