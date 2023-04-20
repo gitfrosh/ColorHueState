@@ -20,6 +20,12 @@ module.exports = {
       url: process.env.ALCHEMY_API_URL,
       accounts: [process.env.PRIVATE_KEY],
     },
+    mainnet: {
+      url: process.env.ALCHEMY_MAINNET_URL,
+      accounts: [process.env.PRIVATE_KEY],
+      gas: 3500000
+
+    }
   },
   etherscan: {
     // Your API key for Etherscan
