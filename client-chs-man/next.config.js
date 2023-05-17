@@ -2,6 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
+  assetPrefix: '/chs-man/',
+
 }
 
 module.exports = nextConfig
