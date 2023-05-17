@@ -2,7 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
-  basePath: '/chs-man',
 }
 
 module.exports = nextConfig
