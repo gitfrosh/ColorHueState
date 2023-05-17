@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "/chs-man"
+  to = "https://chs-man.netlify.app/"
+  status = 301
+
