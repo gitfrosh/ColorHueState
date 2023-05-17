@@ -1,0 +1,39 @@
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "export": "next export"
+  },
+  "dependencies": {
+    "@rainbow-me/rainbowkit": "^0.12.4",
+    "@types/node": "18.15.9",
+    "@types/react": "18.0.29",
+    "@types/react-dom": "18.0.11",
+    "alchemy-sdk": "^2.6.2",
+    "eslint": "8.36.0",
+    "eslint-config-next": "13.2.4",
+    "ethers": "^5.7.2",
+    "next": "13.2.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-icons": "^4.8.0",
+    "react-inlinesvg": "^3.0.2",
+    "react-slick": "^0.29.0",
+    "react-spring": "^9.7.1",
+    "react-svg": "^16.1.7",
+    "slick-carousel": "^1.8.1",
+    "typescript": "5.0.2",
+    "wagmi": "^0.12.6"
+  },
+  "devDependencies": {
+    "@types/react-slick": "^0.23.10",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.7"
+  }
+}
