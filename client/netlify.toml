@@ -1,6 +1,6 @@
 [[redirects]]
-  from = "/chs-man"
-  to = "https://chs-man.netlify.app/"
+  from = "/chs-man/*"
+  to = "https://chs-man.netlify.app/:splat"
   status = 200
   force = true
 
