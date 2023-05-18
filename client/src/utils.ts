@@ -56,6 +56,6 @@ export function render_circles(hash: string) {
       i +
       ')" />\n';
   }
-
+  html += "</svg>";
   return html;
 }
