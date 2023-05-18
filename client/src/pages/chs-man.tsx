@@ -129,12 +129,6 @@ export default function Home() {
           </section>
         )}
       </div>
-      <div>
-        <section className="h-30">
-          <Gallery />
-        </section>
-      </div>
-
       <footer className="h-16 bg-gray-900 text-white flex items-center justify-center">
         © {new Date().getFullYear()}{" "}
         <a
