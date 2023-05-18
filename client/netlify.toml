@@ -1,4 +1,0 @@
-[[redirects]]
-  from = "/chs-man/*"
-  to = "https://chs-man.netlify.app/:splat"
-  status = 200
