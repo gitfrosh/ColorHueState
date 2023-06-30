@@ -354,8 +354,13 @@ export default function Home() {
                 <a target="_blank" href="https://rike.dev">
                   Rike
                 </a>
-                , Roman and Armin without whom this project would not have been
-                possible.
+                , Roman, Timo and Armin without whom this project would not have
+                been possible.
+              </p>
+              <p className="mb-3">
+                <a href="mailto:studio@jurgenostarhild.eu">
+                  <span className="font-bold">Contact</span>
+                </a>
               </p>
             </div>
           </div>
