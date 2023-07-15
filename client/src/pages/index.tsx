@@ -1,31 +1,79 @@
 import Head from "next/head";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { watchBlockNumber } from "@wagmi/core";
-import { useEffect, useState } from "react";
-import { ethers, Signer } from "ethers";
+import { useEffect, useMemo, useState } from "react";
 import { constants } from "../constants";
-import { useAccount, useProvider, useSigner, useNetwork } from "wagmi";
+import {
+  useAccount,
+  usePublicClient,
+  useNetwork,
+  usePrepareContractWrite,
+  useContractWrite,
+  useWaitForTransaction,
+  useContractRead,
+} from "wagmi";
 import Link from "next/link";
 import { get_stage, render_circles } from "../utils";
 import { Gallery } from "@/components/Gallery";
 import { AiFillGithub } from "react-icons/ai";
+import { GetBlockParameters } from "viem";
 
 export default function Home() {
   const { address } = useAccount();
   const [blockData, setBlockData] = useState<any>();
   const [caughtBlock, catchBlock] = useState<any>();
-  const provider = useProvider();
-  const { data: signer } = useSigner();
+  const provider = usePublicClient();
   const [isMinted, setMinted] = useState<any>(false);
   const [svg, setSVG] = useState<string>();
   const [isMinting, toggleMinting] = useState(false);
   const { chain: activeChain } = useNetwork();
   const [stage, setStage] = useState<string>();
-
+  const contractConfig = useMemo(() => {
+    return {
+      address:
+        stage === "production"
+          ? (constants.NFT_ADDRESS as any)
+          : constants.NFT_ADDRESS_GOERLI,
+      abi: constants.NFT_ABI,
+    };
+  }, [stage]);
+  const { data: tokenId } = useContractRead({
+    ...contractConfig,
+    functionName: "totalSupply",
+    args: [],
+    watch: true,
+  });
+  const { config } = usePrepareContractWrite({
+    ...contractConfig,
+    functionName: "mint",
+    args: [caughtBlock?.number],
+    chainId: activeChain?.id,
+  });
+  const { data, write } = useContractWrite(config);
   useEffect(() => {
     setStage(get_stage());
   }, [process]);
+  useWaitForTransaction({
+    hash: data?.hash,
+    chainId: activeChain?.id,
+    enabled: !!data?.hash,
+    onSuccess(receipt) {
+      console.log("Success", receipt);
+      setMinted({
+        txnhash: data?.hash,
+        // tokenId: data?.events[0]?.args?.tokenId as any,
+      });
+      toggleMinting(false);
+    },
+    onSettled(data, error) {
+      console.log("Settled", { data, error });
+    },
 
+    onError(receipt) {
+      console.error("Error", receipt);
+      toggleMinting(false);
+    },
+  });
   const isCorrectChain =
     (stage === "production" && activeChain?.id === 1) ||
     (stage !== "production" && activeChain?.id === 5);
@@ -33,11 +81,6 @@ export default function Home() {
     stage === "production"
       ? "https://etherscan.io"
       : "https://goerli.etherscan.io";
-  console.log(etherscanUrl);
-  const contract = new ethers.Contract(
-    constants.NFT_ADDRESS,
-    constants.NFT_ABI
-  );
 
   useEffect(() => {
     const svg = render_circles(blockData?.hash);
@@ -49,35 +92,18 @@ export default function Home() {
     console.log("isProduction", stage === "production");
   }, []);
 
-  const getBlockData = async (blockNumber: number) => {
+  const getBlockData = async (blockNumber: bigint) => {
     try {
-      const data = await provider.getBlock(blockNumber);
+      const data = await provider.getBlock(blockNumber as GetBlockParameters);
       setBlockData(data);
     } catch (error) {
       console.log(error);
     }
   };
+
   const mint = async () => {
     toggleMinting(true);
-
-    try {
-      const tx = await contract
-        .connect(signer as Signer)
-        .mint(caughtBlock?.number, {
-          gasLimit: 3000000,
-        });
-      const result = await tx.wait();
-      if (result?.transactionHash) {
-        setMinted({
-          txnhash: result?.transactionHash,
-          tokenId: result?.events[0]?.args?.tokenId,
-        });
-      }
-      toggleMinting(false);
-    } catch (error) {
-      console.log("ERROR: ", error);
-      toggleMinting(false);
-    }
+    write?.();
   };
 
   useEffect(() => {
@@ -87,6 +113,7 @@ export default function Home() {
         listen: true,
       },
       (blockNumber) => {
+        console.log(blockNumber);
         getBlockData(blockNumber);
       }
     );
@@ -193,7 +220,11 @@ export default function Home() {
                         : "https://testnets.opensea.io"
                     }/de-DE/assets/${
                       stage === "production" ? "ethereum" : "goerli"
-                    }/${constants.NFT_ADDRESS}/${isMinted?.tokenId}`}
+                    }/${
+                      stage === "production"
+                        ? constants.NFT_ADDRESS
+                        : constants.NFT_ADDRESS_GOERLI
+                    }/${tokenId?.toString()}`}
                   >
                     view on Opensea
                   </a>
@@ -211,7 +242,7 @@ export default function Home() {
                   href={`${`${etherscanUrl}/block/`}${blockData?.number}`}
                 >
                   <span className="text-white font-bold mr-5">
-                    #{blockData?.number}
+                    #{blockData?.number?.toString()}
                   </span>
                 </a>
                 {/* <p>
@@ -266,7 +297,7 @@ export default function Home() {
       </div>
       <div>
         <section className="h-30">
-          <Gallery />
+          <Gallery stage={stage} />
         </section>
       </div>
       <div className="flex flex-col">

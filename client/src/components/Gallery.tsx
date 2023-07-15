@@ -5,21 +5,22 @@ import { useWindowSize } from "../hooks";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { get_stage } from "@/utils";
 
-const config = {
-  apiKey:
-    get_stage() === "production"
-      ? process.env.ALCHEMY_ID_MAINNET
-      : process.env.ALCHEMY_ID,
-  network:
-    get_stage() === "production" ? Network.ETH_MAINNET : Network.ETH_GOERLI,
-};
+interface GalleryProps {
+  stage?: string;
+}
 
-const alchemy = new Alchemy(config);
-
-export function Gallery() {
+export function Gallery({ stage }: GalleryProps) {
   const { width } = useWindowSize();
+  const config = {
+    apiKey:
+      stage === "production"
+        ? process.env.ALCHEMY_ID_MAINNET
+        : process.env.ALCHEMY_ID,
+    network: stage === "production" ? Network.ETH_MAINNET : Network.ETH_GOERLI,
+  };
+
+  const alchemy = new Alchemy(config);
 
   const [nfts, setNfts] = useState<any>();
   useEffect(() => {
@@ -61,12 +62,12 @@ export function Gallery() {
             title={nft?.rawMetadata?.name}
             target="_blank"
             href={`${
-              get_stage() === "production"
+              stage === "production"
                 ? "https://opensea.io"
                 : "https://testnets.opensea.io"
-            }/de-DE/assets/${
-              get_stage() === "production" ? "ethereum" : "goerli"
-            }/${constants.NFT_ADDRESS}/${nft?.tokenId}`}
+            }/de-DE/assets/${stage === "production" ? "ethereum" : "goerli"}/${
+              constants.NFT_ADDRESS
+            }/${nft?.tokenId}`}
           >
             <img alt={nft?.rawMetadata?.name} src={nft.media[0]?.thumbnail} />
           </a>

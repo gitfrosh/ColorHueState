@@ -1,15 +1,16 @@
 import Head from "next/head";
 import { watchBlockNumber } from "@wagmi/core";
 import { useEffect, useState } from "react";
-import { useAccount, useProvider, useNetwork } from "wagmi";
+import { useAccount, usePublicClient, useNetwork } from "wagmi";
 import { get_stage, render_circles } from "../utils";
 import { Gallery } from "@/components/Gallery";
+import { GetBlockParameters } from "viem";
 
 export default function Home() {
   const { address } = useAccount();
   const [blockData, setBlockData] = useState<any>();
   const [caughtBlock, catchBlock] = useState<any>();
-  const provider = useProvider();
+  const provider = usePublicClient();
   const [svg, setSVG] = useState<string>();
   const { chain: activeChain } = useNetwork();
   const [stage, setStage] = useState<string>();
@@ -37,9 +38,9 @@ export default function Home() {
     console.log("isProduction", stage === "production");
   }, []);
 
-  const getBlockData = async (blockNumber: number) => {
+  const getBlockData = async (blockNumber: bigint) => {
     try {
-      const data = await provider.getBlock(blockNumber);
+      const data = await provider.getBlock(blockNumber as GetBlockParameters);
       setBlockData(data);
     } catch (error) {
       console.log(error);

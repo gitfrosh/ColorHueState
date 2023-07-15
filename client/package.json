@@ -10,7 +10,7 @@
     "export": "next export"
   },
   "dependencies": {
-    "@rainbow-me/rainbowkit": "^0.12.4",
+    "@rainbow-me/rainbowkit": "^1.0.6",
     "@types/node": "18.15.9",
     "@types/react": "18.0.29",
     "@types/react-dom": "18.0.11",
@@ -28,7 +28,8 @@
     "react-svg": "^16.1.7",
     "slick-carousel": "^1.8.1",
     "typescript": "5.0.2",
-    "wagmi": "^0.12.6"
+    "viem": "^1.2.14",
+    "wagmi": "^1.3.8"
   },
   "devDependencies": {
     "@types/react-slick": "^0.23.10",
