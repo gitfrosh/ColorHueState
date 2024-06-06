@@ -8,13 +8,13 @@ import {
   midnightTheme,
 } from "@rainbow-me/rainbowkit";
 import { createConfig, WagmiConfig } from "wagmi";
-import { mainnet, goerli } from "wagmi/chains";
+import { mainnet, sepolia } from "wagmi/chains";
 import { get_stage } from "@/utils";
 import { createPublicClient, http } from "viem";
 import { configureChains } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 
-const networks = get_stage() === "production" ? [mainnet] : [goerli];
+const networks = get_stage() === "production" ? [mainnet] : [sepolia];
 
 const { chains } = configureChains(networks as Chain[], [
   // alchemyProvider({ apiKey: process.env.ALCHEMY_ID || "" }),

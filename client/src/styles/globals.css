@@ -128,6 +128,15 @@ a {
   resize: both;
   overflow: auto;
 }
+.svg-container-basel {
+  top: 30px;
+  padding: 5px;
+  position: absolute;
+  width: 100%;
+  height: 80%;
+  resize: both;
+  overflow: auto;
+}
 
 .svg-content {
   width: 100%;
