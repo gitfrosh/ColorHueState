@@ -59,7 +59,7 @@ export default function Home() {
       </Head>
 
       <div className="flex flex-col h-screen">
-        <section className="flex-grow">
+        <section className="svg-wrapper">
           {blockData ? (
             <div
               className="svg-container-basel"
