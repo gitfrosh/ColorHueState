@@ -26,9 +26,9 @@ export default function Home() {
     setStage(get_stage());
   }, [process]);
 
-  const isCorrectChain =
-    (stage === "production" && activeChain?.id === 1) ||
-    (stage !== "production" && activeChain?.id === 11155111);
+  const isCorrectChain = activeChain?.id === 1;
+  // (stage === "production" && activeChain?.id === 1) ||
+  // (stage !== "production" && activeChain?.id === 11155111);
   const etherscanUrl =
     stage === "production"
       ? "https://etherscan.io"

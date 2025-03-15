@@ -14,7 +14,7 @@ import { createPublicClient, http } from "viem";
 import { configureChains } from "wagmi";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 
-const networks = get_stage() === "production" ? [mainnet] : [sepolia];
+const networks = [mainnet, sepolia];
 
 const { chains } = configureChains(networks as Chain[], [
   alchemyProvider({ apiKey: process.env.ALCHEMY_ID_MAINNET || "" }),

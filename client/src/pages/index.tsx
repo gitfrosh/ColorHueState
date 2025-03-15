@@ -69,6 +69,8 @@ export default function Home() {
     chainId: activeChain?.id,
     enabled: Boolean(contractConfig?.address && caughtBlock?.number != null),
   });
+
+  console.log(config);
   const { data, write } = useContractWrite(config);
 
   useEffect(() => {
@@ -96,9 +98,9 @@ export default function Home() {
       toggleMinting(false);
     },
   });
-  const isCorrectChain =
-    (stage === "production" && activeChain?.id === 1) ||
-    (stage !== "production" && activeChain?.id === 11155111);
+  const isCorrectChain = activeChain?.id === 1;
+  // (stage === "production" && activeChain?.id === 1) ||
+  // (stage !== "production" && activeChain?.id === 11155111);
   const etherscanUrl =
     stage === "production"
       ? "https://etherscan.io"
@@ -125,6 +127,7 @@ export default function Home() {
   };
 
   const mint = async () => {
+    console.log(write);
     toggleMinting(true);
     write?.();
   };
