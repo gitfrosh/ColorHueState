@@ -4,12 +4,20 @@ import { useEffect, useState } from "react";
 import { usePublicClient } from "wagmi";
 import { get_stage, render_circles } from "../utils";
 import { GetBlockParameters } from "viem";
+import { Alchemy, Network } from "alchemy-sdk";
 
 export default function Home() {
   const [blockData, setBlockData] = useState<any>();
   const provider = usePublicClient();
   const [svg, setSVG] = useState<string>();
   const [stage, setStage] = useState<string>();
+
+  const alchemyConfig = {
+    apiKey: process.env.ALCHEMY_ID,
+    network: Network.ETH_MAINNET,
+  };
+
+  const alchemy = new Alchemy(alchemyConfig);
 
   useEffect(() => {
     setStage(get_stage());
@@ -27,24 +35,18 @@ export default function Home() {
 
   const getBlockData = async (blockNumber: bigint) => {
     try {
-      const data = await provider.getBlock(blockNumber as GetBlockParameters);
+      const data = await alchemy.core.getBlock(blockNumber as any);
       setBlockData(data);
     } catch (error) {
       console.log(error);
     }
   };
-
   useEffect(() => {
-    watchBlockNumber(
-      {
-        chainId: stage === "production" ? 1 : 11155111, //sepolia
-        listen: true,
-      },
-      (blockNumber) => {
-        console.log(blockNumber);
-        getBlockData(blockNumber);
-      }
-    );
+    console.log("FETCH BLOCK");
+    alchemy.ws.on("block", (blockNumber) => {
+      console.log("The latest block number is", blockNumber);
+      getBlockData(blockNumber);
+    });
   }, []);
   return (
     <>

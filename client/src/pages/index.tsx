@@ -17,6 +17,7 @@ import { get_stage, render_circles } from "../utils";
 import { Gallery } from "@/components/Gallery";
 import { AiFillGithub } from "react-icons/ai";
 import { GetBlockParameters } from "viem";
+import { Alchemy, Network } from "alchemy-sdk";
 
 export default function Home() {
   const { address } = useAccount();
@@ -28,6 +29,14 @@ export default function Home() {
   const [isMinting, toggleMinting] = useState(false);
   const { chain: activeChain } = useNetwork();
   const [stage, setStage] = useState<string>();
+
+  const alchemyConfig = {
+    apiKey: process.env.ALCHEMY_ID,
+    network: Network.ETH_MAINNET,
+  };
+
+  const alchemy = new Alchemy(alchemyConfig);
+
   // const contractConfig = useMemo(() => {
   //   return {
   //     address:
@@ -89,7 +98,7 @@ export default function Home() {
   });
   const isCorrectChain =
     (stage === "production" && activeChain?.id === 1) ||
-    (stage !== "production" && activeChain?.id === 5);
+    (stage !== "production" && activeChain?.id === 11155111);
   const etherscanUrl =
     stage === "production"
       ? "https://etherscan.io"
@@ -103,11 +112,12 @@ export default function Home() {
   useEffect(() => {
     console.log("stage", stage);
     console.log("isProduction", stage === "production");
+    // Subscription for new blocks on Eth Mainnet.
   }, []);
 
   const getBlockData = async (blockNumber: bigint) => {
     try {
-      const data = await provider.getBlock(blockNumber as GetBlockParameters);
+      const data = await alchemy.core.getBlock(blockNumber as any);
       setBlockData(data);
     } catch (error) {
       console.log(error);
@@ -124,16 +134,10 @@ export default function Home() {
     if (blockData?.hash) {
       catchBlock(blockData);
     }
-    watchBlockNumber(
-      {
-        chainId: 1,
-        listen: true,
-      },
-      (blockNumber) => {
-        console.log(blockNumber);
-        getBlockData(blockNumber);
-      }
-    );
+    alchemy.ws.on("block", (blockNumber) => {
+      console.log("The latest block number is", blockNumber);
+      getBlockData(blockNumber);
+    });
   }, []);
 
   return (

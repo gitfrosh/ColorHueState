@@ -12,14 +12,12 @@ import { mainnet, sepolia } from "wagmi/chains";
 import { get_stage } from "@/utils";
 import { createPublicClient, http } from "viem";
 import { configureChains } from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 
 const networks = get_stage() === "production" ? [mainnet] : [sepolia];
 
 const { chains } = configureChains(networks as Chain[], [
-  alchemyProvider({ apiKey: "IrwqfA_DB-GSnX7y41Qp0mOylKdFq7sj" || "" }),
-  // publicProvider(),
+  alchemyProvider({ apiKey: process.env.ALCHEMY_ID || "" }),
 ]);
 
 const { connectors } = getDefaultWallets({
