@@ -13,7 +13,7 @@ export default function Home() {
   const [stage, setStage] = useState<string>();
 
   const alchemyConfig = {
-    apiKey: process.env.ALCHEMY_ID,
+    apiKey: process.env.ALCHEMY_ID_MAINNET,
     network: Network.ETH_MAINNET,
   };
 

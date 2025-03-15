@@ -17,7 +17,7 @@ import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 const networks = get_stage() === "production" ? [mainnet] : [sepolia];
 
 const { chains } = configureChains(networks as Chain[], [
-  alchemyProvider({ apiKey: process.env.ALCHEMY_ID || "" }),
+  alchemyProvider({ apiKey: process.env.ALCHEMY_ID_MAINNET || "" }),
 ]);
 
 const { connectors } = getDefaultWallets({
