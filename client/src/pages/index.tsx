@@ -28,31 +28,44 @@ export default function Home() {
   const [isMinting, toggleMinting] = useState(false);
   const { chain: activeChain } = useNetwork();
   const [stage, setStage] = useState<string>();
+  // const contractConfig = useMemo(() => {
+  //   return {
+  //     address:
+  //       stage === "production"
+  //         ? (constants.NFT_ADDRESS as any)
+  //         : constants.NFT_ADDRESS_GOERLI,
+  //     abi: constants.NFT_ABI,
+  //   };
+  // }, [stage]);
+
   const contractConfig = useMemo(() => {
     return {
-      address:
-        stage === "production"
-          ? (constants.NFT_ADDRESS as any)
-          : constants.NFT_ADDRESS_GOERLI,
+      address: constants.NFT_ADDRESS as any,
       abi: constants.NFT_ABI,
     };
   }, [stage]);
+
   const { data: tokenId } = useContractRead({
     ...contractConfig,
     functionName: "totalSupply",
     args: [],
     watch: true,
+    enabled: contractConfig?.address,
   });
   const { config } = usePrepareContractWrite({
     ...contractConfig,
     functionName: "mint",
-    args: [caughtBlock?.number],
+    args:
+      caughtBlock?.number != null ? [BigInt(caughtBlock.number)] : undefined,
     chainId: activeChain?.id,
+    enabled: Boolean(contractConfig?.address && caughtBlock?.number != null),
   });
   const { data, write } = useContractWrite(config);
+
   useEffect(() => {
     setStage(get_stage());
   }, [process]);
+
   useWaitForTransaction({
     hash: data?.hash,
     chainId: activeChain?.id,
@@ -107,9 +120,13 @@ export default function Home() {
   };
 
   useEffect(() => {
+    console.log("FETCH BLOCK");
+    if (blockData?.hash) {
+      catchBlock(blockData);
+    }
     watchBlockNumber(
       {
-        chainId: stage === "production" ? 1 : 5,
+        chainId: 1,
         listen: true,
       },
       (blockNumber) => {
@@ -118,6 +135,7 @@ export default function Home() {
       }
     );
   }, []);
+
   return (
     <>
       <Head>

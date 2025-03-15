@@ -12,12 +12,20 @@ interface GalleryProps {
 
 export function Gallery({ stage }: GalleryProps) {
   const { width } = useWindowSize();
+  // const config = {
+  //   apiKey:
+  //     stage === "production"
+  //       ? process.env.ALCHEMY_ID_MAINNET
+  //       : process.env.ALCHEMY_ID,
+  //   network: stage === "production" ? Network.ETH_MAINNET : Network.ETH_GOERLI,
+  // };
+
+  // for future developers: goerli is deprecated, cannot be used for testing purposes anymore, shoud be replaced with sepolia
+  // or any other testnet or local network
+
   const config = {
-    apiKey:
-      stage === "production"
-        ? process.env.ALCHEMY_ID_MAINNET
-        : process.env.ALCHEMY_ID,
-    network: stage === "production" ? Network.ETH_MAINNET : Network.ETH_GOERLI,
+    apiKey: "IrwqfA_DB-GSnX7y41Qp0mOylKdFq7sj",
+    network: Network.ETH_MAINNET,
   };
 
   const alchemy = new Alchemy(config);
