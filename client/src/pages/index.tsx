@@ -143,6 +143,19 @@ export default function Home() {
     });
   }, []);
 
+  const buttonStyle = {
+    backgroundColor: "#3399ff",
+    color: "white",
+    fontWeight: "bold",
+    fontSize: "16px",
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
+    transition: "background-color 0.2s ease",
+  };
+
   return (
     <>
       <Head>
@@ -162,7 +175,7 @@ export default function Home() {
           </Link>
 
           <span className="mr-4">
-            <ConnectButton showBalance={false} />
+            <button style={buttonStyle}>Connect Wallet</button>
           </span>
         </header>
         <section className="flex-grow">
